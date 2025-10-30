@@ -1,2 +1,64 @@
-<h1>Hallo Welt!</h1>
-<p>Das ist mein erster GitHub Pages Test.</p>
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Geräteauswahl</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="header-bar">
+  <div id="logo">
+    <a href="https://www.ksb-gt.de" target="_blank" rel="noopener noreferrer">
+      <img src="KSB-Logo.png" alt="Logo">
+    </a>
+  </div>
+    <div id="cart-indicator">
+      🛒 <span id="cart-count">0</span> Artikel ausgewählt
+    </div>
+  </div>
+
+<!-- Mini-Cart -->
+<div id="mini-cart" class="hidden">
+  <div id="mini-cart-content">
+    <div id="mini-cart-header">
+      <h3>🛍️ Deine Auswahl</h3>
+      <button id="closeMiniCart" aria-label="Mini-Cart schließen">×</button>
+    </div>
+    <div id="mini-cart-items"></div>
+    <!-- Formular für Pflichtfelder -->
+    <form id="mini-cart-form" onsubmit="return false;">
+      <label>
+        Name*:
+        <input type="text" id="contact-name" required>
+      </label>
+      <label>
+        Email*:
+        <input type="email" id="contact-email" required>
+      </label>
+      <label>
+        Ausleihdatum Von*:
+        <input type="date" id="date-from" required>
+      </label>
+      <label>
+        Ausleihdatum Bis*:
+        <input type="date" id="date-to" required>
+      </label>
+    </form>
+    <button id="sendCartBtn" disabled>Anfrage senden</button>
+  </div>
+</div>
+
+  <div id="teaser" style="text-align: center; margin: 20px auto; max-width: 800px;">
+    <p>Wähle aus unserer Spielothek die passenden Artikel für deine Veranstaltung!</p>
+  </div>
+  <h1 style="text-align: center;">Ausleihe</h1>
+  <div style="text-align:center;margin-bottom:12px;">
+    <button id="btn">Liste abrufen</button>
+  </div>
+  <div id="anzeige"></div>
+
+  <!-- Script -->
+  <script src="script.js"></script>
+</body>
+</html>
+
