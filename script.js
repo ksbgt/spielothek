@@ -73,7 +73,7 @@ if (btn) {
       });
 
 
-      const resLocal = await fetch("Exports/Artikel.json");
+      const resLocal = await fetch("https://ksbgt.github.io/spielothek/");
       const daten = await resLocal.json();
 
       const vorherigeLaenge = contacts.length; // merken, ob schon Daten da waren
