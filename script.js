@@ -73,7 +73,7 @@ if (btn) {
       });
 
 
-      const res = await fetch("https://ksbgt.github.io/spielothek/Artikel.json");
+      const res = await fetch("https://ksbgt.github.io/spielothek/Exports/Artikel.json");
       const daten = await res.json();
 
       const vorherigeLaenge = contacts.length; // merken, ob schon Daten da waren
