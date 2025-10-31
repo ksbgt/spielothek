@@ -121,28 +121,45 @@ if (btn) {
     closeMiniCart.addEventListener("click", () => miniCart.classList.add("hidden"));
   }
 
-  // 🕒 Datumsfelder vorbelegen & validieren
-  const dateFrom = document.getElementById("date-from");
-  const dateTo = document.getElementById("date-to");
+// 🕒 Datumsfelder vorbelegen & validieren
+const dateFrom = document.getElementById("date-from");
+const dateTo = document.getElementById("date-to");
 
-  if (dateFrom && dateTo) {
-    const today = new Date();
-    const isoToday = today.toISOString().split("T")[0];
+if (dateFrom && dateTo) {
+  const today = new Date();
+  const isoToday = today.toISOString().split("T")[0];
 
-    dateFrom.min = isoToday;  // frühestes erlaubtes Datum
-    dateTo.min = isoToday;
+  dateFrom.min = isoToday;
+  dateTo.min = isoToday;
 
-    const validateDates = () => {
-      if (dateTo.value < dateFrom.value) {
-        dateTo.value = dateFrom.value; // erlauben, dass beides gleich ist
-      }
-      dateTo.min = dateFrom.value;
-      checkFormFields();
-    };
+  const validateDates = () => {
+    const from = dateFrom.value;
+    const to = dateTo.value;
 
-    dateFrom.addEventListener("input", validateDates);
-    dateTo.addEventListener("input", validateDates);
-  }
+    // Wenn "von" leer oder kleiner als heute → auf heute setzen
+    if (from && from < isoToday) {
+      dateFrom.value = isoToday;
+    }
+
+    // "bis"-Datum darf nicht vor "von"-Datum liegen
+    if (to && from && to < from) {
+      dateTo.value = from;
+    }
+
+    // "bis"-Datum darf nicht vor heute liegen
+    if (to && to < isoToday) {
+      dateTo.value = isoToday;
+    }
+
+    dateTo.min = dateFrom.value || isoToday;
+    checkFormFields();
+  };
+
+  dateFrom.addEventListener("input", validateDates);
+  dateTo.addEventListener("input", validateDates);
+  dateFrom.addEventListener("change", validateDates);
+  dateTo.addEventListener("change", validateDates);
+}
 
 
   // 4️⃣ Formularfelder prüfen
