@@ -407,7 +407,7 @@ button:hover { transform: translateY(-2px); }
 }
 
 #summary-modal #cancel-btn {
-  background: #ccc;
+  background: #807e7e;
 }
 
 #summary-modal button:disabled {
