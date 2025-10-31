@@ -72,6 +72,11 @@ if (btn) {
         if (f) f.value = "";
       });
 
+      const BASE_URL = "https://ksbgt.github.io/spielothek/";
+      const bildPfad = item.bild
+        ? (item.bild.startsWith("/") ? BASE_URL + item.bild : BASE_URL + "/" + item.bild)
+        : BASE_URL + "/Standardbilder/standard.jpg";
+
       const resLocal = await fetch("Exports/Artikel.json");
       const daten = await resLocal.json();
 
