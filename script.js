@@ -83,7 +83,7 @@ if (btn) {
         name2: item.name2 || "",
         maxAnzahl: parseInt(item.maxAnzahl ?? "1", 10),
         bereich: item.bereich || "",
-        bild: item.bild
+        bild: item.bild ? (item.bild.startsWith("/") ? item.bild : "/" + item.bild) : ""
       }));
 
       renderKacheln(contacts);
