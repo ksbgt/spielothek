@@ -48,14 +48,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const sendBtn = document.getElementById("sendCartBtn");
 
 // 1️⃣ Artikel-Liste laden
+// 1️⃣ Artikel-Liste laden
 if (btn) {
   btn.addEventListener("click", async () => {
-    // Nur warnen, wenn bereits Daten vorhanden sind
     if (contacts.length > 0 || aktuelleAuswahl.length > 0) {
       const confirmReload = confirm(
         "Die aktuelle Auswahlliste wird gelöscht und neu geladen.\n\nMöchten Sie fortfahren?"
       );
-      if (!confirmReload) return; // Abbrechen = nichts tun
+      if (!confirmReload) return;
     }
 
     try {
@@ -73,40 +73,44 @@ if (btn) {
       });
 
       const BASE_URL = "https://ksbgt.github.io/spielothek/";
-      const bildPfad = item.bild
-        ? (item.bild.startsWith("/") ? BASE_URL + item.bild : BASE_URL + "/" + item.bild)
-        : BASE_URL + "/Standardbilder/standard.jpg";
 
+      // JSON-Datei abrufen
       const resLocal = await fetch("Exports/Artikel.json");
       const daten = await resLocal.json();
 
-      const vorherigeLaenge = contacts.length; // merken, ob schon Daten da waren
+      const vorherigeLaenge = contacts.length;
 
-      contacts = daten.map(item => ({
-        barcode: item.barcode || "",
-        artikel: item.artikel || "",
-        name2: item.name2 || "",
-        maxAnzahl: parseInt(item.maxAnzahl ?? "1", 10),
-        bereich: item.bereich || "",
-        bild: item.bild ? (item.bild.startsWith("/") ? item.bild : "/" + item.bild) : ""
-      }));
+      // Artikel-Daten aufbereiten
+      contacts = daten.map(item => {
+        const bildPfad = item.bild
+          ? (item.bild.startsWith("/") ? BASE_URL + item.bild : BASE_URL + "/" + item.bild)
+          : BASE_URL + "/Standardbilder/standard.jpg";
+
+        return {
+          barcode: item.barcode || "",
+          artikel: item.artikel || "",
+          name2: item.name2 || "",
+          maxAnzahl: parseInt(item.maxAnzahl ?? "1", 10),
+          bereich: item.bereich || "",
+          bild: bildPfad
+        };
+      });
 
       renderKacheln(contacts);
 
-      // Meldung nur anzeigen, wenn vorher schon Daten vorhanden waren
       if (vorherigeLaenge > 0) {
         alert("Artikelliste wurde neu geladen.");
       }
-
     } catch (err) {
-      console.error("Fehler beim Laden:", err);
-      alert("Fehler beim Abrufen der Artikeldaten: " + (err.message || err));
+      console.error("Fehler beim Abrufen der Artikeldaten:", err);
+      alert("Fehler beim Abrufen der Artikeldaten: " + err.message);
     } finally {
       btn.disabled = false;
-      btn.textContent = "Liste erneut abrufen";
+      btn.textContent = "Liste abrufen";
     }
   });
 }
+
 
 
   // 2️⃣ Warenkorb-Indikator togglen
