@@ -72,44 +72,37 @@ if (btn) {
         if (f) f.value = "";
       });
 
-      const BASE_URL = "https://ksbgt.github.io/spielothek/";
-      
-        // Json abrufen
       const resLocal = await fetch("Exports/Artikel.json");
       const daten = await resLocal.json();
 
       const vorherigeLaenge = contacts.length; // merken, ob schon Daten da waren
 
-      // Artikel-Daten aufbereiten
-      contacts = daten.map(item => {
-        const bildPfad = item.bild
-          ? (item.bild.startsWith("/") ? BASE_URL + item.bild : BASE_URL + "/" + item.bild)
-          : BASE_URL + "/Standardbilder/standard.jpg";
-
-        return {
-          barcode: item.barcode || "",
-          artikel: item.artikel || "",
-          name2: item.name2 || "",
-          maxAnzahl: parseInt(item.maxAnzahl ?? "1", 10),
-          bereich: item.bereich || "",
-          bild: bildPfad
-        };
-      });
+      contacts = daten.map(item => ({
+        barcode: item.barcode || "",
+        artikel: item.artikel || "",
+        name2: item.name2 || "",
+        maxAnzahl: parseInt(item.maxAnzahl ?? "1", 10),
+        bereich: item.bereich || "",
+        bild: item.bild
+      }));
 
       renderKacheln(contacts);
 
+      // Meldung nur anzeigen, wenn vorher schon Daten vorhanden waren
       if (vorherigeLaenge > 0) {
         alert("Artikelliste wurde neu geladen.");
       }
+
     } catch (err) {
-      console.error("Fehler beim Abrufen der Artikeldaten:", err);
-      alert("Fehler beim Abrufen der Artikeldaten: " + err.message);
+      console.error("Fehler beim Laden:", err);
+      alert("Fehler beim Abrufen der Artikeldaten: " + (err.message || err));
     } finally {
       btn.disabled = false;
-      btn.textContent = "Liste abrufen";
+      btn.textContent = "Liste erneut abrufen";
     }
   });
 }
+
 
   // 2️⃣ Warenkorb-Indikator togglen
   if (cartIndicator && miniCart) {
@@ -160,7 +153,6 @@ if (dateFrom && dateTo) {
   dateFrom.addEventListener("change", validateDates);
   dateTo.addEventListener("change", validateDates);
 }
-
 
   // 4️⃣ Formularfelder prüfen
   ["contact-name", "contact-email", "date-from", "date-to"].forEach(id => {
@@ -362,7 +354,6 @@ karte.innerHTML = `
     ${bildSrc ? `<img src="${bildSrc}" alt="${nameSafe}" style="width:150px;border-radius:8px;">` : ""}
   </div>
   <h4>${nameSafe}</h4>
-  <p>${barcodeSafe}</p>
   <p><strong>Max. ${maxAnzahl}</strong>
     <label> : Anzahl</label>
     <input type="number" class="anzahl-input" data-barcode="${barcodeSafe}" value="1" min="1" max="${maxAnzahl}">
