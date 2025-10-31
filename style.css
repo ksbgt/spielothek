@@ -268,12 +268,13 @@ button:hover { transform: translateY(-2px); }
 /* Formular */
 #mini-cart-form {
   margin-bottom: 10px;
+  font-family: inherit;
 }
 
 #mini-cart-form label {
   display: block;
-  margin-bottom: 8px;
-  font-size: 14px;
+  margin-bottom: 6px;
+  font-size: 15px;
   text-align: left;  /* ← Labels linksbündig */
 }
 
