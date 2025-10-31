@@ -271,6 +271,7 @@ button:hover { transform: translateY(-2px); }
   font-family: inherit;
 }
 
+/* Labels */
 #mini-cart-form label {
   display: block;
   margin-bottom: 6px;
@@ -278,30 +279,62 @@ button:hover { transform: translateY(-2px); }
   text-align: left;  /* ← Labels linksbündig */
 }
 
-#mini-cart-form input {
+/* Eingabefelder */
+#mini-cart-form input,
+#mini-cart-form select,
+#mini-cart-form textarea {
   width: 100%;
-  padding: 6px;
-  margin-top: 2px;
+  padding: 8px 10px;               /* mehr Innenabstand */
+  margin-bottom: 12px;
   box-sizing: border-box;
   border: 1px solid #ccc;
-  border-radius: 4px;
-  text-align: left;  /* ← Labels linksbündig */
+  border-radius: 6px;
+  font-size: 16px;                  /* gute Lesbarkeit auch auf Mobilgeräten */
+  line-height: 1.4;
+  text-align: left;
+  appearance: none;                 /* entfernt Browser-Stile (z. B. iOS-Schatten) */
 }
 
-/* Buttons */
+/* Datumseingabe (Datepicker) */
+#mini-cart-form input[type="date"] {
+  min-height: 44px;                 /* Touch-freundlich */
+  font-size: 16px;
+}
+
+/* Button */
 #sendCartBtn {
   width: 100%;
   background-color: royalblue;
   color: white;
-  padding: 10px;
+  padding: 12px 0;
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 17px;
+  transition: background-color 0.2s ease;
 }
 
 #sendCartBtn:hover {
   background-color: #0056d6;
+}
+
+/* Responsive Anpassung für kleine Bildschirme */
+@media (max-width: 768px) {
+  #mini-cart-form input,
+  #mini-cart-form select,
+  #mini-cart-form textarea {
+    font-size: 18px;      /* größer auf Touch-Geräten */
+    padding: 12px 14px;
+  }
+
+  #mini-cart-form label {
+    font-size: 16px;
+  }
+
+  #sendCartBtn {
+    font-size: 18px;
+    padding: 14px 0;
+  }
 }
 
 #sendCartBtn:disabled {
