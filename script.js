@@ -50,7 +50,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const sendBtn = document.getElementById("sendCartBtn");
 
 // 1️⃣ Artikel-Liste laden
-// 1️⃣ Artikel-Liste laden
 if (btn) {
   btn.addEventListener("click", async () => {
     if (contacts.length > 0 || aktuelleAuswahl.length > 0) {
@@ -210,15 +209,15 @@ if (emailInput) {
   }
 
   // Zusammenfassung HTML
-let messageHTML = `<strong>Bitte die Eingaben prüfen:</strong><br><br>`;
-messageHTML += `Name: ${escapeHtml(name)}<br>`;
-messageHTML += `E-Mail: ${escapeHtml(email)}<br>`;
-messageHTML += `Zeitraum: ${escapeHtml(formatDateGerman(von))} bis ${escapeHtml(formatDateGerman(bis))}<br>`;
+let messageHTML = `<strong>Bitte die Eingaben prüfen:</strong><br>`;
+messageHTML += `<p><strong>Name:</strong><br> ${escapeHtml(name)}<br></p>`;
+messageHTML += `<p><strong>E-Mail:</strong><br> ${escapeHtml(email)}<br></p>`;
+messageHTML += `<p><strong>Zeitraum:</strong><br> ${escapeHtml(formatDateGerman(von))} bis ${escapeHtml(formatDateGerman(bis))}<br></p>`;
   // Zeilenumbrüche im Mitteilungstext beibehalten
   const formattedInfo = info
     ? escapeHtml(info).replace(/\n/g, "<br>")
     : "—";
-messageHTML += `Mitteilung:<br>${formattedInfo}<br><br>`;
+messageHTML += `<strong>Mitteilung:</strong><br>${formattedInfo}<br><br>`;
 messageHTML += `<strong>Ausgewählte Artikel:</strong><br>`;
   if (aktuelleAuswahl.length === 0) {
     messageHTML += `Keine Artikel ausgewählt.<br>`;
