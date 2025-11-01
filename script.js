@@ -21,13 +21,15 @@ function escapeHtml(str) {
 }
 
 function checkFormFields() {
-  const formFieldIds = ["contact-name", "contact-email", "date-from", "date-to"];
-  const allFilled = formFieldIds.every(id => {
+  // Nur Pflichtfelder prüfen (ohne contact-info)
+  const requiredFieldIds = ["contact-name", "contact-email", "date-from", "date-to"];
+  const allRequiredFilled = requiredFieldIds.every(id => {
     const el = document.getElementById(id);
     return el && String(el.value).trim() !== "";
   });
+
   const sendBtn = document.getElementById("sendCartBtn");
-  if (sendBtn) sendBtn.disabled = !(allFilled && aktuelleAuswahl.length > 0);
+  if (sendBtn) sendBtn.disabled = !(allRequiredFilled && aktuelleAuswahl.length > 0);
 }
 
 function formatDateGerman(isoDateStr) {
@@ -67,7 +69,7 @@ if (btn) {
       updateCartIndicator();
 
       // Formulafelder zurücksetzen
-      ["contact-name", "contact-email", "date-from", "date-to"].forEach(id => {
+      ["contact-name", "contact-email", "date-from", "date-to", "contact-info"].forEach(id => {
         const f = document.getElementById(id);
         if (f) f.value = "";
       });
@@ -164,7 +166,7 @@ if (dateFrom && dateTo) {
 }
 
   // 4️⃣ Formularfelder prüfen
-  ["contact-name", "contact-email", "date-from", "date-to"].forEach(id => {
+  ["contact-name", "contact-email", "date-from", "date-to", "contact-info"].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.addEventListener("input", checkFormFields);
   });
@@ -193,6 +195,7 @@ if (emailInput) {
   function openSummaryModal() {
     const name = document.getElementById("contact-name")?.value.trim() || "";
     const email = document.getElementById("contact-email")?.value.trim() || "";
+    const info = document.getElementById("contact-info")?.value.trim() || "";
     const von = document.getElementById("date-from")?.value || "";
     const bis = document.getElementById("date-to")?.value || "";
 
@@ -207,9 +210,16 @@ if (emailInput) {
   }
 
   // Zusammenfassung HTML
-  let messageHTML = `<strong>Bitte die Eingaben prüfen:</strong><br><br>`;
-  messageHTML += `Name: ${escapeHtml(name)}<br>Email: ${escapeHtml(email)}<br>Zeitraum: ${escapeHtml(formatDateGerman(von))} bis: ${escapeHtml(formatDateGerman(bis))}<br><br>`;
-  messageHTML += `<strong>Ausgewählte Artikel:</strong><br>`;
+let messageHTML = `<strong>Bitte die Eingaben prüfen:</strong><br><br>`;
+messageHTML += `Name: ${escapeHtml(name)}<br>`;
+messageHTML += `E-Mail: ${escapeHtml(email)}<br>`;
+messageHTML += `Zeitraum: ${escapeHtml(formatDateGerman(von))} bis ${escapeHtml(formatDateGerman(bis))}<br>`;
+  // Zeilenumbrüche im Mitteilungstext beibehalten
+  const formattedInfo = info
+    ? escapeHtml(info).replace(/\n/g, "<br>")
+    : "—";
+messageHTML += `Mitteilung:<br>${formattedInfo}<br><br>`;
+messageHTML += `<strong>Ausgewählte Artikel:</strong><br>`;
   if (aktuelleAuswahl.length === 0) {
     messageHTML += `Keine Artikel ausgewählt.<br>`;
   } else {
@@ -267,6 +277,7 @@ if (emailInput) {
       email,
       ausleih_von: von,
       ausleih_bis: bis,
+      info,
       ausgewaehlt: aktuelleAuswahl.map(a => ({
         barcode: a.barcode,
         artikel: a.artikel,
@@ -297,7 +308,7 @@ if (emailInput) {
           input.value = 1;
           input.classList.remove("input-fehler");
         });
-        ["contact-name","contact-email","date-from","date-to"].forEach(id => {
+        ["contact-name","contact-email","date-from","date-to","contact-info"].forEach(id => {
           const f = document.getElementById(id);
           if(f) f.value="";
         });
