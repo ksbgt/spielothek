@@ -269,7 +269,7 @@ messageHTML += `<strong>Ausgewählte Artikel:</strong><br>`;
     const okBtn = this;
     okBtn.disabled = true;      // sofort deaktivieren
     statusEl.textContent = "⏳ Sende Anfrage...";
-    statusEl.style.color = "#0680d7";
+    statusEl.style.color = "#dc011eff";
 
     const payload = {
       name,
