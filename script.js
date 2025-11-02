@@ -21,7 +21,7 @@ function escapeHtml(str) {
 }
 
 function checkFormFields() {
-  // Nur Pflichtfelder prüfen (ohne contact-info)
+  // Nur Pflichtfelder prüfen (ohne contact-info und contact-organisation)
   const requiredFieldIds = ["contact-name", "contact-email", "date-from", "date-to"];
   const allRequiredFilled = requiredFieldIds.every(id => {
     const el = document.getElementById(id);
@@ -36,7 +36,11 @@ function formatDateGerman(isoDateStr) {
   if (!isoDateStr) return "";
   const d = new Date(isoDateStr);
   if (isNaN(d)) return isoDateStr; // falls ungültig
-  return d.toLocaleDateString("de-DE"); // z. B. 26.10.2025
+  return d.toLocaleDateString("de-DE", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric"
+  });
 }
 
 /* ===========================
@@ -68,7 +72,7 @@ if (btn) {
       updateCartIndicator();
 
       // Formulafelder zurücksetzen
-      ["contact-name", "contact-email", "date-from", "date-to", "contact-info"].forEach(id => {
+      ["contact-name", "contact-email", "date-from", "date-to", "contact-info", "contact-organisation"].forEach(id => {
         const f = document.getElementById(id);
         if (f) f.value = "";
       });
@@ -165,7 +169,7 @@ if (dateFrom && dateTo) {
 }
 
   // 4️⃣ Formularfelder prüfen
-  ["contact-name", "contact-email", "date-from", "date-to", "contact-info"].forEach(id => {
+  ["contact-name", "contact-email", "date-from", "date-to", "contact-info", "contact-organisation"].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.addEventListener("input", checkFormFields);
   });
@@ -194,6 +198,7 @@ if (emailInput) {
   function openSummaryModal() {
     const name = document.getElementById("contact-name")?.value.trim() || "";
     const email = document.getElementById("contact-email")?.value.trim() || "";
+    const orga = document.getElementById("contact-organisation")?.value.trim() || "";
     const info = document.getElementById("contact-info")?.value.trim() || "";
     const von = document.getElementById("date-from")?.value || "";
     const bis = document.getElementById("date-to")?.value || "";
@@ -212,6 +217,7 @@ if (emailInput) {
 let messageHTML = `<strong>Bitte die Eingaben prüfen:</strong><br>`;
 messageHTML += `<p><strong>Name:</strong><br> ${escapeHtml(name)}<br></p>`;
 messageHTML += `<p><strong>E-Mail:</strong><br> ${escapeHtml(email)}<br></p>`;
+messageHTML += `<p><strong>Organisation:</strong><br> ${escapeHtml(orga)}<br></p>`;
 messageHTML += `<p><strong>Zeitraum:</strong><br> ${escapeHtml(formatDateGerman(von))} bis ${escapeHtml(formatDateGerman(bis))}<br></p>`;
   // Zeilenumbrüche im Mitteilungstext beibehalten
   const formattedInfo = info
@@ -241,7 +247,7 @@ messageHTML += `<strong>Ausgewählte Artikel:</strong><br>`;
         <div id="summary-scroll" style="max-height:60vh; overflow-y:auto; margin-bottom:10px; padding-right:4px;"></div>
         <div id="summary-status" style="font-weight:bold; margin-bottom:10px;"></div>
         <div class="modal-actions">
-          <button id="confirm-btn">OK</button>
+          <button id="confirm-btn">Senden</button>
           <button id="cancel-btn">Abbrechen</button>
         </div>
       </div>`;
@@ -264,16 +270,16 @@ messageHTML += `<strong>Ausgewählte Artikel:</strong><br>`;
   }, { once: true });
 
   // OK-Button
-    confirmBtn.onclick = async function() {   // normale Function, kein Arrow
-    this.disabled = true;                    // Button wird deaktiviert
+  confirmBtn.onclick = async function() {
+    this.disabled = true;
     const okBtn = this;
-    okBtn.disabled = true;      // sofort deaktivieren
     statusEl.textContent = "⏳ Sende Anfrage...";
-    statusEl.style.color = "#dc011eff";
+    statusEl.style.color = "#0680d7";
 
     const payload = {
       name,
       email,
+      orga,
       ausleih_von: von,
       ausleih_bis: bis,
       info,
@@ -287,7 +293,6 @@ messageHTML += `<strong>Ausgewählte Artikel:</strong><br>`;
 
     try {
       sendBtn.disabled = true;
-
       const resFlow = await fetch(FLOW_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -299,6 +304,9 @@ messageHTML += `<strong>Ausgewählte Artikel:</strong><br>`;
       if (antwort.success) {
         statusEl.textContent = "✅ Anfrage erfolgreich gesendet!";
         statusEl.style.color = "#06803d";
+
+        // ✅ OK-Button bleibt deaktiviert nach Erfolg
+        okBtn.disabled = true;
 
         // Alles zurücksetzen
         aktuelleAuswahl = [];
@@ -317,15 +325,16 @@ messageHTML += `<strong>Ausgewählte Artikel:</strong><br>`;
       } else {
         statusEl.textContent = "❌ Anfrage konnte nicht verarbeitet werden: " + (antwort.message || "");
         statusEl.style.color = "#d00";
+        okBtn.disabled = false; // Fehler -> Reaktivieren erlaubt
       }
 
     } catch(err) {
       console.error(err);
       statusEl.textContent = "❌ Anfrage konnte nicht gesendet werden. Bitte prüfen Sie Ihre Internetverbindung.";
       statusEl.style.color = "#d00";
+      okBtn.disabled = false; // Fehler -> Reaktivieren erlaubt
     } finally {
       sendBtn.disabled = false;
-      okBtn.disabled = false;   // Button wieder aktivieren
       checkFormFields();
     }
   };
