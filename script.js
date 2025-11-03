@@ -276,20 +276,24 @@ messageHTML += `<strong>Ausgewählte Artikel:</strong><br>`;
     statusEl.textContent = "⏳ Sende Anfrage...";
     statusEl.style.color = "#0680d7";
 
-    const payload = {
-      name,
-      email,
-      orga,
-      ausleih_von: von,
-      ausleih_bis: bis,
-      info,
-      ausgewaehlt: aktuelleAuswahl.map(a => ({
-        barcode: a.barcode,
-        artikel: a.artikel,
-        Kategoriename: a.Kategoriename || "",
-        Auswahl_Anzahl: a.Auswahl_Anzahl
-      }))
-    };
+  // alphabetisch sortierte Kopie der Auswahl für den Flow
+  const ausgewaehltSortiert = [...aktuelleAuswahl].sort((a, b) =>
+    a.artikel.localeCompare(b.artikel, "de", { sensitivity: "base" })
+  );
+
+  const payload = {
+    name,
+    email,
+    ausleih_von: von,
+    ausleih_bis: bis,
+    info,
+    ausgewaehlt: ausgewaehltSortiert.map(a => ({
+      barcode: a.barcode,
+      artikel: a.artikel,
+      Kategoriename: a.Kategoriename || "",
+      Auswahl_Anzahl: a.Auswahl_Anzahl
+    }))
+  };
 
     try {
       sendBtn.disabled = true;
