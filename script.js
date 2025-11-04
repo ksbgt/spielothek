@@ -269,6 +269,26 @@ messageHTML += `<strong>Ausgewählte Artikel:</strong><br>`;
     if (e.key === "Escape") closeModal();
   }, { once: true });
 
+  // ✅ Hilfsfunktion zum kompletten Zurücksetzen nach erfolgreichem Versand
+  function resetFormAndCart() {
+    // Formularfelder leeren
+    ["contact-name","contact-email","date-from","date-to","contact-info"].forEach(id => {
+      const f = document.getElementById(id);
+      if (f) f.value = "";
+    });
+
+    // Auswahl & Warenkorb zurücksetzen
+    aktuelleAuswahl = [];
+    document.querySelectorAll(".select-artikel").forEach(cb => cb.checked = false);
+    document.querySelectorAll(".anzahl-input").forEach(input => {
+      input.value = 1;
+      input.classList.remove("input-fehler");
+    });
+
+    if (typeof updateCartIndicator === "function") updateCartIndicator();
+    if (typeof miniCart !== "undefined" && miniCart) miniCart.classList.add("hidden");
+  }
+
   // OK-Button
   confirmBtn.onclick = async function() {
     this.disabled = true;
@@ -305,32 +325,47 @@ messageHTML += `<strong>Ausgewählte Artikel:</strong><br>`;
 
       const antwort = await resFlow.json();
 
-      if (antwort.success) {
-        statusEl.textContent = "✅ Anfrage erfolgreich gesendet!";
-        statusEl.style.color = "#06803d";
+if (antwort.success) {
+  statusEl.textContent = "✅ Anfrage erfolgreich gesendet!";
+  statusEl.style.color = "#06803d";
 
-        // ✅ OK-Button bleibt deaktiviert nach Erfolg
-        okBtn.disabled = true;
+  // Alten OK-Button deaktivieren & ausblenden
+  okBtn.disabled = true;
+  okBtn.style.display = "none";
 
-        // Alles zurücksetzen
-        aktuelleAuswahl = [];
-        document.querySelectorAll(".select-artikel").forEach(cb => cb.checked = false);
-        document.querySelectorAll(".anzahl-input").forEach(input => {
-          input.value = 1;
-          input.classList.remove("input-fehler");
-        });
-        ["contact-name","contact-email","date-from","date-to","contact-info"].forEach(id => {
-          const f = document.getElementById(id);
-          if(f) f.value="";
-        });
-        if(miniCart) miniCart.classList.add("hidden");
-        updateCartIndicator();
+  // 🔹 Hinweis + neuer Button
+  const neuBtn = document.createElement("button");
+  neuBtn.textContent = "Neue Anfrage starten";
+  neuBtn.className = "btn btn-primary mt-3";
+  neuBtn.style.backgroundColor = "#1764c0";
+  neuBtn.style.color = "white";
+  neuBtn.style.borderRadius = "8px";
+  neuBtn.style.padding = "8px 16px";
+  neuBtn.onclick = () => {
+    resetFormAndCart();
+    closeSummaryModal();
 
-      } else {
-        statusEl.textContent = "❌ Anfrage konnte nicht verarbeitet werden: " + (antwort.message || "");
-        statusEl.style.color = "#d00";
-        okBtn.disabled = false; // Fehler -> Reaktivieren erlaubt
-      }
+    // alten Button wieder aktivieren & zeigen
+    okBtn.disabled = false;
+    okBtn.style.display = "";
+    statusEl.textContent = "";
+  };
+
+  // Hinweis für Nutzer
+  const hinweis = document.createElement("p");
+  hinweis.textContent = "Sie können nun eine neue Anfrage starten.";
+  hinweis.style.marginTop = "12px";
+  hinweis.style.color = "#1764c0";
+  hinweis.style.fontSize = "0.9rem";
+
+  // beides unter die Erfolgsmeldung setzen
+  statusEl.insertAdjacentElement("afterend", hinweis);
+  hinweis.insertAdjacentElement("afterend", neuBtn);
+} else {
+  statusEl.textContent = "❌ Anfrage konnte nicht verarbeitet werden: " + (antwort.message || "");
+  statusEl.style.color = "#d00";
+  okBtn.disabled = false; // Fehler -> Reaktivieren erlaubt
+}
 
     } catch(err) {
       console.error(err);
