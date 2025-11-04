@@ -274,7 +274,7 @@ messageHTML += `<strong>Ausgewählte Artikel:</strong><br>`;
     this.disabled = true;
     const okBtn = this;
     statusEl.textContent = "⏳ Sende Anfrage...";
-    statusEl.style.color = "#0680d7";
+    statusEl.style.color = "#d7060aff";
 
   // alphabetisch sortierte Kopie der Auswahl für den Flow
   const ausgewaehltSortiert = [...aktuelleAuswahl].sort((a, b) =>
