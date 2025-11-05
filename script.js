@@ -255,7 +255,6 @@ function openSummaryModal() {
   const scrollContainer = modal.querySelector("#summary-scroll");
   const statusEl = modal.querySelector("#summary-status");
   const confirmBtn = modal.querySelector("#confirm-btn");
-  const cancelBtnEl = modal.querySelector("#cancel-btn");
   const closeBtn = modal.querySelector(".modal-close");
 
   scrollContainer.innerHTML = messageHTML;
@@ -276,23 +275,36 @@ function openSummaryModal() {
   if (closeBtn) closeBtn.onclick = closeModal;
 
   // Cancel-Button
-  if (cancelBtnEl) {
-    cancelBtnEl.onclick = async () => {
-      resetFormAndCart();
-      closeModal();
-      if (confirmBtn) {
-        confirmBtn.disabled = false;
-        confirmBtn.style.display = "";
-      }
-      if (sendBtn) sendBtn.disabled = true;
-      statusEl.textContent = "";
-      try {
-        if (typeof ladeArtikelListe === "function") await ladeArtikelListe();
-      } catch (e) {
-        console.warn("Fehler beim Zurücksetzen:", e);
-      }
-    };
-  }
+const cancelBtnEl = modal.querySelector("#cancel-btn");
+if (cancelBtnEl) {
+  cancelBtnEl.onclick = async () => {
+    // 🧹 Aufräumen der dynamischen Buttons und Hinweise
+    const existingHint = modal.querySelector(".summary-hint");
+    const existingRow = modal.querySelector(".summary-btn-row");
+    if (existingHint) existingHint.remove();
+    if (existingRow) existingRow.remove();
+
+    // 🧩 Formular, Auswahl und Warenkorb zurücksetzen
+    resetFormAndCart();
+
+    // 🔁 Artikelliste neu laden wie bei „Liste abrufen“
+    const btn = document.getElementById("btn");
+    if (btn) btn.click();
+
+    // 🔘 Buttons & Anzeige zurücksetzen
+    const confirmBtn = modal.querySelector("#confirm-btn");
+    if (confirmBtn) {
+      confirmBtn.disabled = false;
+      confirmBtn.style.display = "";
+    }
+    if (sendBtn) sendBtn.disabled = true;
+
+    // Fenster schließen
+    modal.classList.add("hidden");
+    document.body.style.overflow = ""; // Scroll wieder erlauben
+  };
+}
+
 
   // Escape-Key schließt Modal
   document.addEventListener(
