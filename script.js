@@ -4,12 +4,12 @@
 const FLOW_URL = "https://default28ebaa5f323243f6a9f97bbab24287.04.environment.api.powerplatform.com/powerautomate/automations/direct/workflows/d79c6deba27f45378d447a649b64f1f4/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=LpAN8V30e1596p_AbRLWzimW5KanTiX9U_ojfYHAqoM";
 
 // Globale Variablen
-let contacts = [];           // alle geladenen Artikel
-let aktuelleAuswahl = [];    // aktuell ausgewählte Artikel
+let contacts = [];
+let aktuelleAuswahl = [];
 
-/* ===========================
-   Hilfsfunktionen
-   =========================== */
+// ===========================
+// Hilfsfunktionen
+// ===========================
 function escapeHtml(str) {
   if (str === null || str === undefined) return "";
   return String(str)
@@ -21,7 +21,6 @@ function escapeHtml(str) {
 }
 
 function checkFormFields() {
-  // Nur Pflichtfelder prüfen (ohne contact-info und contact-organisation)
   const requiredFieldIds = ["contact-name", "contact-email", "date-from", "date-to"];
   const allRequiredFilled = requiredFieldIds.every(id => {
     const el = document.getElementById(id);
@@ -35,17 +34,13 @@ function checkFormFields() {
 function formatDateGerman(isoDateStr) {
   if (!isoDateStr) return "";
   const d = new Date(isoDateStr);
-  if (isNaN(d)) return isoDateStr; // falls ungültig
-  return d.toLocaleDateString("de-DE", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric"
-  });
+  if (isNaN(d)) return isoDateStr;
+  return d.toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" });
 }
 
-/* ===========================
-   DOMContentLoaded
-   =========================== */
+// ===========================
+// DOMContentLoaded
+// ===========================
 document.addEventListener("DOMContentLoaded", () => {
   const btn = document.getElementById("btn"); // „Liste abrufen“
   const cartIndicator = document.getElementById("cart-indicator");
@@ -53,70 +48,57 @@ document.addEventListener("DOMContentLoaded", () => {
   const closeMiniCart = document.getElementById("closeMiniCart");
   const sendBtn = document.getElementById("sendCartBtn");
 
-// 1️⃣ Artikel-Liste laden
-if (btn) {
-  btn.addEventListener("click", async () => {
-    if (contacts.length > 0 || aktuelleAuswahl.length > 0) {
-      const confirmReload = confirm(
-        "Die aktuelle Auswahlliste wird gelöscht und neu geladen.\n\nMöchten Sie fortfahren?"
-      );
-      if (!confirmReload) return;
-    }
-
-    try {
-      btn.disabled = true;
-      btn.textContent = "Lade...";
-
-      // Alte Auswahl zurücksetzen
-      aktuelleAuswahl = [];
-      updateCartIndicator();
-
-      // Formulafelder zurücksetzen
-      ["contact-name", "contact-email", "date-from", "date-to", "contact-info", "contact-organisation"].forEach(id => {
-        const f = document.getElementById(id);
-        if (f) f.value = "";
-      });
-
-      const BASE_URL = "https://ksbgt.github.io/spielothek/";
-
-      // JSON-Datei abrufen
-      const resLocal = await fetch("Exports/Artikel.json");
-      const daten = await resLocal.json();
-
-      const vorherigeLaenge = contacts.length;
-
-      // Artikel-Daten aufbereiten
-      contacts = daten.map(item => {
-        const bildPfad = item.bild
-          ? (item.bild.startsWith("/") ? BASE_URL + item.bild : BASE_URL + "/" + item.bild)
-          : BASE_URL + "/Standardbilder/standard.jpg";
-
-        return {
-          barcode: item.barcode || "",
-          artikel: item.artikel || "",
-          name2: item.name2 || "",
-          maxAnzahl: parseInt(item.maxAnzahl ?? "1", 10),
-          bereich: item.bereich || "",
-          bild: bildPfad
-        };
-      });
-
-      renderKacheln(contacts);
-
-      if (vorherigeLaenge > 0) {
-        alert("Artikelliste wurde neu geladen.");
+  // 1️⃣ Artikel-Liste laden
+  if (btn) {
+    btn.addEventListener("click", async () => {
+      if (contacts.length > 0 || aktuelleAuswahl.length > 0) {
+        const confirmReload = confirm(
+          "Die aktuelle Auswahlliste wird gelöscht und neu geladen.\n\nMöchten Sie fortfahren?"
+        );
+        if (!confirmReload) return;
       }
-    } catch (err) {
-      console.error("Fehler beim Abrufen der Artikeldaten:", err);
-      alert("Fehler beim Abrufen der Artikeldaten: " + err.message);
-    } finally {
-      btn.disabled = false;
-      btn.textContent = "Liste abrufen";
-    }
-  });
-}
 
+      try {
+        btn.disabled = true;
+        btn.textContent = "Lade...";
 
+        aktuelleAuswahl = [];
+        updateCartIndicator();
+
+        ["contact-name", "contact-email", "date-from", "date-to", "contact-info", "contact-organisation"].forEach(id => {
+          const f = document.getElementById(id);
+          if (f) f.value = "";
+        });
+
+        const BASE_URL = "https://ksbgt.github.io/spielothek/";
+        const resLocal = await fetch("Exports/Artikel.json");
+        const daten = await resLocal.json();
+
+        contacts = daten.map(item => {
+          const bildPfad = item.bild
+            ? (item.bild.startsWith("/") ? BASE_URL + item.bild : BASE_URL + "/" + item.bild)
+            : BASE_URL + "/Standardbilder/standard.jpg";
+
+          return {
+            barcode: item.barcode || "",
+            artikel: item.artikel || "",
+            name2: item.name2 || "",
+            maxAnzahl: parseInt(item.maxAnzahl ?? "1", 10),
+            bereich: item.bereich || "",
+            bild: bildPfad
+          };
+        });
+
+        renderKacheln(contacts);
+      } catch (err) {
+        console.error("Fehler beim Abrufen der Artikeldaten:", err);
+        alert("Fehler beim Abrufen der Artikeldaten: " + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Liste abrufen";
+      }
+    });
+  }
 
   // 2️⃣ Warenkorb-Indikator togglen
   if (cartIndicator && miniCart) {
@@ -128,73 +110,59 @@ if (btn) {
     closeMiniCart.addEventListener("click", () => miniCart.classList.add("hidden"));
   }
 
-// 🕒 Datumsfelder vorbelegen & validieren
-const dateFrom = document.getElementById("date-from");
-const dateTo = document.getElementById("date-to");
+  // 4️⃣ Datumsfelder & Validierung
+  const dateFrom = document.getElementById("date-from");
+  const dateTo = document.getElementById("date-to");
 
-if (dateFrom && dateTo) {
-  const today = new Date();
-  const isoToday = today.toISOString().split("T")[0];
+  if (dateFrom && dateTo) {
+    const today = new Date();
+    const isoToday = today.toISOString().split("T")[0];
+    dateFrom.min = isoToday;
+    dateTo.min = isoToday;
 
-  dateFrom.min = isoToday;
-  dateTo.min = isoToday;
+    const validateDates = () => {
+      const from = dateFrom.value;
+      const to = dateTo.value;
+      if (from && from < isoToday) dateFrom.value = isoToday;
+      if (to && from && to < from) dateTo.value = from;
+      if (to && to < isoToday) dateTo.value = isoToday;
+      dateTo.min = dateFrom.value || isoToday;
+      checkFormFields();
+    };
 
-  const validateDates = () => {
-    const from = dateFrom.value;
-    const to = dateTo.value;
+    dateFrom.addEventListener("input", validateDates);
+    dateTo.addEventListener("input", validateDates);
+    dateFrom.addEventListener("change", validateDates);
+    dateTo.addEventListener("change", validateDates);
+  }
 
-    // Wenn "von" leer oder kleiner als heute → auf heute setzen
-    if (from && from < isoToday) {
-      dateFrom.value = isoToday;
-    }
-
-    // "bis"-Datum darf nicht vor "von"-Datum liegen
-    if (to && from && to < from) {
-      dateTo.value = from;
-    }
-
-    // "bis"-Datum darf nicht vor heute liegen
-    if (to && to < isoToday) {
-      dateTo.value = isoToday;
-    }
-
-    dateTo.min = dateFrom.value || isoToday;
-    checkFormFields();
-  };
-
-  dateFrom.addEventListener("input", validateDates);
-  dateTo.addEventListener("input", validateDates);
-  dateFrom.addEventListener("change", validateDates);
-  dateTo.addEventListener("change", validateDates);
-}
-
-  // 4️⃣ Formularfelder prüfen
+  // 5️⃣ Formularfelder prüfen
   ["contact-name", "contact-email", "date-from", "date-to", "contact-info", "contact-organisation"].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.addEventListener("input", checkFormFields);
   });
 
-// 🔍 E-Mailfeld minimal prüfen (nicht leer + muss @ enthalten)
-const emailInput = document.getElementById("contact-email");
-if (emailInput) {
-  emailInput.addEventListener("input", () => {
-    const email = emailInput.value.trim();
-    if (email === "" || !email.includes("@")) {
-      emailInput.classList.add("input-fehler");
-    } else {
-      emailInput.classList.remove("input-fehler");
-    }
-    checkFormFields(); // Schaltfläche neu prüfen
-  });
-}
-
-  // 5️⃣ Auswahl an Flow senden (mit scrollbarem Modal & Statusanzeige)
-  if (sendBtn) {
-    sendBtn.addEventListener("click", () => {
-      openSummaryModal();
+  // 6️⃣ Minimalprüfung E-Mail
+  const emailInput = document.getElementById("contact-email");
+  if (emailInput) {
+    emailInput.addEventListener("input", () => {
+      const email = emailInput.value.trim();
+      if (email === "" || !email.includes("@")) emailInput.classList.add("input-fehler");
+      else emailInput.classList.remove("input-fehler");
+      checkFormFields();
     });
   }
 
+  // 7️⃣ Zusammenfassung + Modal + Versand
+  if (sendBtn) sendBtn.addEventListener("click", openSummaryModal);
+
+  // Initial
+  checkFormFields();
+});
+
+// ===========================
+// Modal & Versand
+// ===========================
 function openSummaryModal() {
   const name = document.getElementById("contact-name")?.value.trim() || "";
   const email = document.getElementById("contact-email")?.value.trim() || "";
@@ -203,36 +171,25 @@ function openSummaryModal() {
   const von = document.getElementById("date-from")?.value || "";
   const bis = document.getElementById("date-to")?.value || "";
 
-  if (!name || !email || !von || !bis) {
-    alert("Bitte alle Pflichtfelder ausfüllen.");
-    return;
-  }
+  if (!name || !email || !von || !bis) return alert("Bitte alle Pflichtfelder ausfüllen.");
+  if (new Date(bis) < new Date(von)) return alert("Das Enddatum darf nicht vor dem Startdatum liegen.");
 
-  if (new Date(bis) < new Date(von)) {
-    alert("Das Enddatum darf nicht vor dem Startdatum liegen.");
-    return;
-  }
-
-  // Zusammenfassung HTML
   let messageHTML = `<strong>Bitte die Eingaben prüfen:</strong><br>`;
   messageHTML += `<p><strong>Name:</strong><br> ${escapeHtml(name)}<br></p>`;
   messageHTML += `<p><strong>E-Mail:</strong><br> ${escapeHtml(email)}<br></p>`;
   messageHTML += `<p><strong>Organisation:</strong><br> ${escapeHtml(orga)}<br></p>`;
   messageHTML += `<p><strong>Zeitraum:</strong><br> ${escapeHtml(formatDateGerman(von))} bis ${escapeHtml(formatDateGerman(bis))}<br></p>`;
-  const formattedInfo = info ? escapeHtml(info).replace(/\n/g, "<br>") : "—";
+  const formattedInfo = info ? escapeHtml(info).replace(/\n/g,"<br>") : "—";
   messageHTML += `<strong>Mitteilung:</strong><br>${formattedInfo}<br><br>`;
   messageHTML += `<strong>Ausgewählte Artikel:</strong><br>`;
-  if (aktuelleAuswahl.length === 0) {
-    messageHTML += `Keine Artikel ausgewählt.<br>`;
-  } else {
+  if (aktuelleAuswahl.length === 0) messageHTML += `Keine Artikel ausgewählt.<br>`;
+  else {
     messageHTML += `<ol>`;
-    aktuelleAuswahl.forEach((a) => {
-      messageHTML += `<li>${escapeHtml(a.artikel)} (${escapeHtml(String(a.Auswahl_Anzahl))} x)</li>`;
-    });
+    aktuelleAuswahl.forEach(a => messageHTML += `<li>${escapeHtml(a.artikel)} (${escapeHtml(String(a.Auswahl_Anzahl))} x)</li>`);
     messageHTML += `</ol>`;
   }
 
-  // Modal erzeugen oder finden
+  // Modal erzeugen/finden
   let modal = document.getElementById("summary-modal");
   if (!modal) {
     modal = document.createElement("div");
@@ -256,296 +213,187 @@ function openSummaryModal() {
   const statusEl = modal.querySelector("#summary-status");
   const confirmBtn = modal.querySelector("#confirm-btn");
   const closeBtn = modal.querySelector(".modal-close");
+  const cancelBtn = modal.querySelector("#cancel-btn");
 
   scrollContainer.innerHTML = messageHTML;
   statusEl.textContent = "";
-
-  // Modal-Overlay verhindern Scroll außerhalb
-  const overlay = modal.querySelector(".modal-overlay");
-  if (overlay) overlay.addEventListener("click", (e) => e.stopPropagation());
+  modal.classList.remove("hidden");
   document.body.style.overflow = "hidden";
 
-  // Funktion zum sauberen Schließen
   const closeModal = () => {
     modal.classList.add("hidden");
     document.body.style.overflow = "";
   };
 
-  // Close-Button (X)
-  if (closeBtn) closeBtn.onclick = closeModal;
+  closeBtn.onclick = closeModal;
+  cancelBtn.onclick = () => { resetFormAndCart(); closeModal(); };
+  document.addEventListener("keydown", e => { if(e.key==="Escape") closeModal(); }, { once:true });
 
-  // Cancel-Button
-const cancelBtnEl = modal.querySelector("#cancel-btn");
-if (cancelBtnEl) {
-  cancelBtnEl.onclick = async () => {
-    // 🧹 Aufräumen der dynamischen Buttons und Hinweise
-    const existingHint = modal.querySelector(".summary-hint");
-    const existingRow = modal.querySelector(".summary-btn-row");
-    if (existingHint) existingHint.remove();
-    if (existingRow) existingRow.remove();
+confirmBtn.onclick = async () => {
+  confirmBtn.disabled = true;
+  statusEl.textContent = "⏳ Sende Anfrage...";
+  statusEl.style.color = "#d7060aff";
 
-    // 🧩 Formular, Auswahl und Warenkorb zurücksetzen
-    resetFormAndCart();
+  const ausgewaehltSortiert = [...aktuelleAuswahl].sort((a,b) => a.artikel.localeCompare(b.artikel,"de",{sensitivity:"base"}));
+  const payload = { name, email, ausleih_von: von, ausleih_bis: bis, info, ausgewaehlt: ausgewaehltSortiert.map(a => ({
+    barcode: a.barcode,
+    artikel: a.artikel,
+    Kategoriename: a.Kategoriename||"",
+    Auswahl_Anzahl: a.Auswahl_Anzahl
+  }))};
 
-    // 🔁 Artikelliste neu laden wie bei „Liste abrufen“
-    const btn = document.getElementById("btn");
-    if (btn) btn.click();
+  try {
+    const resFlow = await fetch(FLOW_URL, { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(payload) });
+    const antwort = await resFlow.json();
 
-    // 🔘 Buttons & Anzeige zurücksetzen
-    const confirmBtn = modal.querySelector("#confirm-btn");
-    if (confirmBtn) {
-      confirmBtn.disabled = false;
-      confirmBtn.style.display = "";
+    if (antwort.success) {
+      statusEl.textContent = "✅ Anfrage erfolgreich gesendet!";
+      statusEl.style.color = "#06803d";
+      // Senden-Button ausblenden
+      confirmBtn.style.display = "none";
+
+      // Die Auswahl wird **noch nicht** zurückgesetzt – passiert erst bei Abbrechen
+    } else {
+      statusEl.textContent = "❌ Anfrage konnte nicht verarbeitet werden: " + (antwort.message||"");
+      statusEl.style.color = "#d00";
+      confirmBtn.disabled=false;
     }
-    if (sendBtn) sendBtn.disabled = true;
+  } catch(err) {
+    console.error(err);
+    statusEl.textContent="❌ Anfrage konnte nicht gesendet werden. Bitte prüfen Sie Ihre Internetverbindung.";
+    statusEl.style.color="#d00";
+    confirmBtn.disabled=false;
+  } finally { checkFormFields(); }
+};
 
-    // Fenster schließen
-    modal.classList.add("hidden");
-    document.body.style.overflow = ""; // Scroll wieder erlauben
-  };
 }
 
-
-  // Escape-Key schließt Modal
-  document.addEventListener(
-    "keydown",
-    (e) => {
-      if (e.key === "Escape") closeModal();
-    },
-    { once: true }
-  );
-
-  // OK-Button (Senden)
-  if (confirmBtn) {
-    confirmBtn.onclick = async function () {
-      const okBtn = this;
-      okBtn.disabled = true;
-      statusEl.textContent = "⏳ Sende Anfrage...";
-      statusEl.style.color = "#d7060aff";
-
-      const ausgewaehltSortiert = [...aktuelleAuswahl].sort((a, b) =>
-        a.artikel.localeCompare(b.artikel, "de", { sensitivity: "base" })
-      );
-
-      const payload = {
-        name,
-        email,
-        ausleih_von: von,
-        ausleih_bis: bis,
-        info,
-        ausgewaehlt: ausgewaehltSortiert.map((a) => ({
-          barcode: a.barcode,
-          artikel: a.artikel,
-          Kategoriename: a.Kategoriename || "",
-          Auswahl_Anzahl: a.Auswahl_Anzahl,
-        })),
-      };
-
-      try {
-        sendBtn.disabled = true;
-        const resFlow = await fetch(FLOW_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-        const antwort = await resFlow.json();
-
-        if (antwort.success) {
-          statusEl.textContent = "✅ Anfrage erfolgreich gesendet!";
-          statusEl.style.color = "#06803d";
-          okBtn.disabled = true;
-          okBtn.style.display = "none";
-
-          const hinweis = document.createElement("p");
-          hinweis.className = "summary-hint";
-          hinweis.style.marginTop = "12px";
-          hinweis.style.color = "#1764c0";
-          hinweis.style.fontSize = "0.9rem";
-          hinweis.textContent =
-            "Sie können nun eine neue Anfrage starten oder abbrechen.";
-
-          const btnContainer = document.createElement("div");
-          btnContainer.className = "summary-btn-row";
-          btnContainer.style.display = "flex";
-          btnContainer.style.justifyContent = "center";
-          btnContainer.style.alignItems = "center";
-          btnContainer.style.gap = "10px";
-          btnContainer.style.marginTop = "10px";
-
-          const neuBtn = document.createElement("button");
-          neuBtn.textContent = "Neue Anfrage";
-          neuBtn.style.backgroundColor = "#1764c0";
-          neuBtn.style.color = "white";
-          neuBtn.style.borderRadius = "8px";
-          neuBtn.style.padding = "8px 16px";
-          neuBtn.style.border = "none";
-          neuBtn.style.cursor = "pointer";
-
-          neuBtn.onclick = () => {
-            resetFormAndCart();
-            closeModal();
-            okBtn.disabled = false;
-            okBtn.style.display = "";
-            checkFormFields();
-            statusEl.textContent = "";
-          };
-
-          btnContainer.appendChild(neuBtn);
-          if (cancelBtnEl) btnContainer.appendChild(cancelBtnEl);
-
-          const existingHint = modal.querySelector(".summary-hint");
-          const existingRow = modal.querySelector(".summary-btn-row");
-          if (existingHint) existingHint.remove();
-          if (existingRow) existingRow.remove();
-
-          statusEl.insertAdjacentElement("afterend", hinweis);
-          hinweis.insertAdjacentElement("afterend", btnContainer);
-        } else {
-          statusEl.textContent =
-            "❌ Anfrage konnte nicht verarbeitet werden: " +
-            (antwort.message || "");
-          statusEl.style.color = "#d00";
-          okBtn.disabled = false;
-          if (sendBtn) sendBtn.disabled = false;
-        }
-      } catch (err) {
-        console.error(err);
-        statusEl.textContent =
-          "❌ Anfrage konnte nicht gesendet werden. Bitte prüfen Sie Ihre Internetverbindung.";
-        statusEl.style.color = "#d00";
-        okBtn.disabled = false;
-        if (sendBtn) sendBtn.disabled = false;
-      } finally {
-        checkFormFields();
-      }
-    };
-  }
-
-  modal.classList.remove("hidden");
-}
-
-  // Initialer Zustand
+// ===========================
+// Mini-Cart & Events
+// ===========================
+function updateCartIndicator() {
+  const count = aktuelleAuswahl.length;
+  const cartCountEl = document.getElementById("cart-count");
+  if(cartCountEl) cartCountEl.textContent=count;
+  renderMiniCart();
   checkFormFields();
-});
+}
 
-/* ===========================
-   Kacheln rendern
-   =========================== */
+function renderMiniCart() {
+  const list = document.getElementById("mini-cart-items");
+  if(!list) return;
+  list.innerHTML="";
+  if(!aktuelleAuswahl.length) { list.innerHTML="<p><em>Keine Artikel ausgewählt.</em></p>"; return; }
+
+  aktuelleAuswahl.forEach(a => {
+    const item=document.createElement("div");
+    item.className="cart-item";
+    item.innerHTML=`
+      <button class="remove-item" data-barcode="${escapeHtml(a.barcode)}">×</button>
+      <div class="text-block">
+        <div style="font-weight:600;">${escapeHtml(a.artikel)}</div>
+        <div style="font-weight:200;">(${escapeHtml(String(a.Auswahl_Anzahl))} x)</div>
+      </div>`;
+    list.appendChild(item);
+  });
+
+  list.querySelectorAll(".remove-item").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const barcode = btn.dataset.barcode;
+      aktuelleAuswahl = aktuelleAuswahl.filter(a => a.barcode!==barcode);
+      const cb = document.querySelector(`.select-artikel[data-barcode="${barcode}"]`);
+      if(cb){ cb.checked=false; const input=cb.closest(".karte")?.querySelector(".anzahl-input"); if(input){input.value=1; input.classList.remove("input-fehler");} }
+      updateCartIndicator();
+    });
+  });
+}
+
+// ===========================
+// Kacheln rendern
+// ===========================
 function renderKacheln(contactsArray) {
-  const container = document.getElementById("anzeige");
-  if (!container) return;
+  const container=document.getElementById("anzeige");
+  if(!container) return;
+  container.innerHTML="";
+  if(!contactsArray?.length){container.innerHTML="<p><em>Keine Artikeldaten vorhanden.</em></p>"; return;}
 
-  container.innerHTML = "";
+  const grid=document.createElement("div");
+  grid.className="karten-container";
+  contactsArray.forEach(item=>{
+    const nameSafe=escapeHtml(item.artikel||"Unbekannt");
+    const barcodeSafe=escapeHtml(item.barcode||"");
+    const maxAnzahl=item.maxAnzahl||1;
+    const bildSrc=escapeHtml(item.bild||"");
 
-  if (!contactsArray?.length) {
-    container.innerHTML = "<p><em>Keine Artikeldaten vorhanden.</em></p>";
-    return;
-  }
-
-  const grid = document.createElement("div");
-  grid.className = "karten-container";
-
-  contactsArray.forEach(item => {
-    const idSafe = escapeHtml(item.id);
-    const nameSafe = escapeHtml(item.artikel || "Unbekannt");
-    const barcodeSafe = escapeHtml(item.barcode || "");
-    const maxAnzahl = item.maxAnzahl || 1;
-    const bildSrc = escapeHtml(item.bild || "");
-
-const karte = document.createElement("div");
-karte.className = "karte";
-karte.innerHTML = `
-  <div class="checkbox-wrapper" style="display:flex;align-items:center;justify-content:flex-start;position:relative;">
-    <input type="checkbox" class="select-artikel" data-barcode="${barcodeSafe}" aria-label="Artikel auswählen">
-    <span class="tooltip-placeholder" data-tooltip="Auswählen:\n${nameSafe}"></span>
-  </div>
-  <div style="margin-top:10px;">
-    ${bildSrc ? `<img src="${bildSrc}" alt="${nameSafe}" style="width:150px;border-radius:8px;">` : ""}
-  </div>
-  <h4>${nameSafe}</h4>
-  <p><strong>Max. ${maxAnzahl}</strong>
-    <label> : Anzahl</label>
-    <input type="number" class="anzahl-input" data-barcode="${barcodeSafe}" value="1" min="1" max="${maxAnzahl}">
-  </p>
-  <button class="details-btn" data-barcode="${barcodeSafe}">Details</button>
-`;
-grid.appendChild(karte);
+    const karte=document.createElement("div");
+    karte.className="karte";
+    karte.innerHTML=`
+      <div class="checkbox-wrapper" style="display:flex;align-items:center;justify-content:flex-start;position:relative;">
+        <input type="checkbox" class="select-artikel" data-barcode="${barcodeSafe}" aria-label="Artikel auswählen">
+        <span class="tooltip-placeholder" data-tooltip="Auswählen:\n${nameSafe}"></span>
+      </div>
+      <div style="margin-top:10px;">
+        ${bildSrc? `<img src="${bildSrc}" alt="${nameSafe}" style="width:150px;border-radius:8px;">`:""}
+      </div>
+      <h4>${nameSafe}</h4>
+      <p><strong>Max. ${maxAnzahl}</strong>
+        <label> : Anzahl</label>
+        <input type="number" class="anzahl-input" data-barcode="${barcodeSafe}" value="1" min="1" max="${maxAnzahl}">
+      </p>
+      <button class="details-btn" data-barcode="${barcodeSafe}">Details</button>
+    `;
+    grid.appendChild(karte);
   });
 
   container.appendChild(grid);
   initCartEvents();
 }
 
-/* ===========================
-   Event-Handling
-   =========================== */
+// ===========================
+// Events für Kacheln
+// ===========================
 function initCartEvents() {
-  const miniCartEl = document.getElementById("mini-cart");
+  const miniCartEl=document.getElementById("mini-cart");
 
-// Checkboxen
-document.querySelectorAll(".select-artikel").forEach(cb => {
-  const barcode = cb.dataset.barcode;
-  const artikelObj = contacts.find(c => c.barcode === barcode);
-
-  // Tooltip hinzufügen (nur wenn Artikel gefunden)
-  if (artikelObj) {
-    cb.dataset.tooltip = `Auswählen:\n${artikelObj.artikel}`;
-  }
-
-  cb.addEventListener("change", () => {
-    const karte = cb.closest(".karte");
-    const input = karte?.querySelector(".anzahl-input");
-    const menge = parseInt(input?.value || 1, 10);
-    const artikelObj = contacts.find(c => c.barcode === barcode);
-    if (!artikelObj) return;
-
-    if (cb.checked) {
-      if (!aktuelleAuswahl.find(a => a.barcode === barcode)) {
-        aktuelleAuswahl.push({
-          barcode,
-          artikel: artikelObj.artikel,
-          Kategoriename: artikelObj.bereich || "",
-          Auswahl_Anzahl: menge
-        });
+  document.querySelectorAll(".select-artikel").forEach(cb=>{
+    const barcode=cb.dataset.barcode;
+    cb.addEventListener("change", ()=>{
+      const karte=cb.closest(".karte");
+      const input=karte?.querySelector(".anzahl-input");
+      const menge=parseInt(input?.value||1,10);
+      const artikelObj=contacts.find(c=>c.barcode===barcode);
+      if(!artikelObj) return;
+      if(cb.checked){
+        if(!aktuelleAuswahl.find(a=>a.barcode===barcode)){
+          aktuelleAuswahl.push({barcode, artikel:artikelObj.artikel, Kategoriename:artikelObj.bereich||"", Auswahl_Anzahl:menge});
+        }
+      } else {
+        aktuelleAuswahl=aktuelleAuswahl.filter(a=>a.barcode!==barcode);
       }
-    } else {
-      aktuelleAuswahl = aktuelleAuswahl.filter(a => a.barcode !== barcode);
-    }
-
-    updateCartIndicator();
-    if (aktuelleAuswahl.length > 0 && miniCartEl?.classList.contains("hidden")) {
-      miniCartEl.classList.remove("hidden");
-    }
+      updateCartIndicator();
+      if(aktuelleAuswahl.length>0 && miniCartEl?.classList.contains("hidden")) miniCartEl.classList.remove("hidden");
+    });
   });
-});
 
-  // Anzahl ändern
-  document.querySelectorAll(".anzahl-input").forEach(input => {
-  input.addEventListener("input", () => {
-    const barcode = input.dataset.barcode;
-    let wert = parseInt(input.value || 1, 10);
-    const max = parseInt(input.max || 1, 10);
-    if (isNaN(wert) || wert < 1) wert = 1;
-    if (wert > max) {
-      wert = max;
-      input.classList.add("input-fehler");
-    } else {
-      input.classList.remove("input-fehler");
-    }
-    input.value = wert;
-
-    const artikel = aktuelleAuswahl.find(a => a.barcode === barcode);
-    if (artikel) artikel.Auswahl_Anzahl = wert;
-    updateCartIndicator();
+  document.querySelectorAll(".anzahl-input").forEach(input=>{
+    input.addEventListener("input", ()=>{
+      const barcode=input.dataset.barcode;
+      let wert=parseInt(input.value||1,10);
+      const max=parseInt(input.max||1,10);
+      if(isNaN(wert)||wert<1) wert=1;
+      if(wert>max){wert=max; input.classList.add("input-fehler");} else input.classList.remove("input-fehler");
+      input.value=wert;
+      const artikel=aktuelleAuswahl.find(a=>a.barcode===barcode);
+      if(artikel) artikel.Auswahl_Anzahl=wert;
+      updateCartIndicator();
+    });
   });
-});
 
-  // Details anzeigen
-  document.querySelectorAll(".details-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const barcode = btn.dataset.barcode;
-      const artikel = contacts.find(c => c.barcode === barcode);
-      if (!artikel) return alert("Keine Details gefunden.");
+  document.querySelectorAll(".details-btn").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const barcode=btn.dataset.barcode;
+      const artikel=contacts.find(c=>c.barcode===barcode);
+      if(!artikel) return alert("Keine Details gefunden.");
       openDetailsModal(artikel);
     });
   });
@@ -553,107 +401,54 @@ document.querySelectorAll(".select-artikel").forEach(cb => {
   updateCartIndicator();
 }
 
-/* ===========================
-   Modal: Artikeldetails
-   =========================== */
-function openDetailsModal(artikel) {
-  let modal = document.getElementById("details-modal");
-  if (!modal) {
-    modal = document.createElement("div");
-    modal.id = "details-modal";
-    modal.innerHTML = `
+// ===========================
+// Artikeldetails-Modal
+// ===========================
+function openDetailsModal(artikel){
+  let modal=document.getElementById("details-modal");
+  if(!modal){
+    modal=document.createElement("div");
+    modal.id="details-modal";
+    modal.innerHTML=`
       <div class="modal-overlay"></div>
       <div class="modal-content" role="dialog" aria-modal="true">
         <button class="modal-close">×</button>
         <div id="details-body"></div>
       </div>`;
     document.body.appendChild(modal);
-
-    modal.querySelector(".modal-close").addEventListener("click", () => modal.remove());
-    modal.querySelector(".modal-overlay").addEventListener("click", () => modal.remove());
-    document.addEventListener("keydown", e => {
-      if (e.key === "Escape") modal.remove();
-    });
+    modal.querySelector(".modal-close").addEventListener("click",()=>modal.remove());
+    modal.querySelector(".modal-overlay").addEventListener("click",()=>modal.remove());
+    document.addEventListener("keydown",e=>{if(e.key==="Escape") modal.remove();});
   }
-
-  const body = modal.querySelector("#details-body");
-  const bild = artikel.bild || "";
-  body.innerHTML = `
-    <h3 class="artikel-titel">${escapeHtml(artikel.artikel || "Artikel")}</h3>
-    <h4 class="artikel-subtitel">${escapeHtml(artikel.name2 || "Keine zusätzliche Beschreibung")}</h4>
+  const body=modal.querySelector("#details-body");
+  const bild=artikel.bild||"";
+  body.innerHTML=`
+    <h3 class="artikel-titel">${escapeHtml(artikel.artikel||"Artikel")}</h3>
+    <h4 class="artikel-subtitel">${escapeHtml(artikel.name2||"Keine zusätzliche Beschreibung")}</h4>
     <dl class="artikel-details">
-      <div>
-        <dt>Max. Anzahl:</dt>
-        <dd>${escapeHtml(String(artikel.maxAnzahl ?? "—"))}</dd>
-      </div>
-      <div>
-        <dt>Code:</dt>
-        <dd>${escapeHtml(artikel.barcode || "—")}</dd>
-      </div>
-      <div>
-        <dt>Bereich:</dt>
-        <dd>${escapeHtml(artikel.bereich || "—")}</dd>
-      </div>
+      <div><dt>Max. Anzahl:</dt><dd>${escapeHtml(String(artikel.maxAnzahl??"—"))}</dd></div>
+      <div><dt>Code:</dt><dd>${escapeHtml(artikel.barcode||"—")}</dd></div>
+      <div><dt>Bereich:</dt><dd>${escapeHtml(artikel.bereich||"—")}</dd></div>
     </dl>
-    ${bild ? `<img class="artikel-bild" src="${escapeHtml(bild)}" alt="${escapeHtml(artikel.name)}">` : ""}
+    ${bild? `<img class="artikel-bild" src="${escapeHtml(bild)}" alt="${escapeHtml(artikel.name)}">`:""}
   `;
 }
 
-/* ===========================
-   Mini-Cart
-   =========================== */
-function updateCartIndicator() {
-  const count = aktuelleAuswahl.length;
-  const cartCountEl = document.getElementById("cart-count");
-  if (cartCountEl) cartCountEl.textContent = count;
-  renderMiniCart();
-  checkFormFields();
-}
-
-function renderMiniCart() {
-  const list = document.getElementById("mini-cart-items");
-  if (!list) return;
-  list.innerHTML = "";
-
-  if (!aktuelleAuswahl.length) {
-    list.innerHTML = "<p><em>Keine Artikel ausgewählt.</em></p>";
-    return;
-  }
-
-aktuelleAuswahl.forEach(a => {
-  const item = document.createElement("div");
-  item.className = "cart-item";
-  item.innerHTML = `
-    <button class="remove-item" data-barcode="${escapeHtml(a.barcode)}">×</button>
-    <div class="text-block">
-      <div style="font-weight:600;">${escapeHtml(a.artikel)}</div>
-      <div style="font-weight:200;">(${escapeHtml(String(a.Auswahl_Anzahl))} x)</div>
-    </div>
-  `;
-  list.appendChild(item);
-});
-
-
-  // Entfernen
-  list.querySelectorAll(".remove-item").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const barcode = btn.dataset.barcode;
-      aktuelleAuswahl = aktuelleAuswahl.filter(a => a.barcode !== barcode);
-
-      const cb = document.querySelector(`.select-artikel[data-barcode="${barcode}"]`);
-      if (cb) {
-        cb.checked = false;
-        const input = cb.closest(".karte")?.querySelector(".anzahl-input");
-        if (input) {
-          input.value = 1;
-          input.classList.remove("input-fehler");
-        }
-      }
-      updateCartIndicator();
-    });
+// ===========================
+// Formular & Warenkorb zurücksetzen
+// ===========================
+function resetFormAndCart(){
+  ["contact-name","contact-email","date-from","date-to","contact-info","contact-organisation"].forEach(id=>{
+    const f=document.getElementById(id); if(f) f.value="";
   });
+  aktuelleAuswahl=[];
+  document.querySelectorAll(".select-artikel").forEach(cb=>cb.checked=false);
+  document.querySelectorAll(".anzahl-input").forEach(input=>{input.value=1; input.classList.remove("input-fehler");});
+  const miniCart=document.getElementById("mini-cart");
+  if(miniCart) miniCart.classList.add("hidden");
+  updateCartIndicator();
 }
 
-/* ===========================
-   Ende script.js
-   =========================== */
+// ===========================
+// Ende script.js
+// ===========================
