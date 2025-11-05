@@ -333,9 +333,9 @@ if (antwort.success) {
   okBtn.disabled = true;
   okBtn.style.display = "none";
 
-  // 🔹 Hinweis + neuer Button
+  // 🔹 Hinweis + neuer Button                   
   const neuBtn = document.createElement("button");
-  neuBtn.textContent = "Neue Anfrage starten";
+  neuBtn.textContent = "Neue Anfrage";
   neuBtn.className = "btn btn-primary mt-3";
   neuBtn.style.backgroundColor = "#1764c0";
   neuBtn.style.color = "white";
@@ -353,7 +353,7 @@ if (antwort.success) {
 
   // Hinweis für Nutzer
   const hinweis = document.createElement("p");
-  hinweis.textContent = "Sie können nun eine neue Anfrage starten.";
+  // hinweis.textContent = "Sie können nun eine neue Anfrage starten.";
   hinweis.style.marginTop = "12px";
   hinweis.style.color = "#1764c0";
   hinweis.style.fontSize = "0.9rem";
