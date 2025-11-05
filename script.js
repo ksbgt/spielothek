@@ -284,27 +284,34 @@ document.body.style.overflow = "hidden"; // Scroll sperren
   // Event-Handler
 // Sauberer Close-Handler (auch für das X oben)
 const closeBtn = modal.querySelector(".modal-close");
-if (closeBtn) {
-  closeBtn.onclick = () => {
-    // Aufräumen der dynamischen Elemente, falls vorhanden
+if (cancelBtnEl) {
+  cancelBtnEl.onclick = async () => {
+    // 🧹 Aufräumen der dynamischen Buttons und Hinweise
     const existingHint = modal.querySelector(".summary-hint");
     const existingRow = modal.querySelector(".summary-btn-row");
     if (existingHint) existingHint.remove();
     if (existingRow) existingRow.remove();
 
-    // Formular & Warenkorb in sicherem Zustand zurücksetzen
-    try { resetFormAndCart(); } catch(e){ /* noop */ }
+    // 🧩 Formular, Auswahl und Warenkorb zurücksetzen
+    try {
+      resetFormAndCart();
+      if (typeof ladeArtikelListe === "function") {
+        await ladeArtikelListe(); // 🔁 Liste wie bei "Liste abrufen" neu laden
+      }
+    } catch(e) {
+      console.warn("Fehler beim Zurücksetzen:", e);
+    }
 
-    // Buttons/Status zurücksetzen
+    // 🔘 Buttons & Anzeige zurücksetzen
     if (confirmBtn) {
       confirmBtn.disabled = false;
       confirmBtn.style.display = "";
     }
     if (sendBtn) {
-      // sendBtn bleibt deaktiviert, bis Pflichtfelder/Auswahl wieder vorhanden sind
       sendBtn.disabled = true;
     }
-    // Modal wirklich schließen und Scroll wieder erlauben
+
+    // Fenster schließen
     closeModal();
   };
 }
@@ -312,14 +319,24 @@ if (closeBtn) {
 // Cancel-Button (Abbrechen) verwendet gleiche Aufräum-Logik
 const cancelBtnEl = modal.querySelector("#cancel-btn");
 if (cancelBtnEl) {
-  cancelBtnEl.onclick = () => {
+  cancelBtnEl.onclick = async () => {
+    // 🧹 Aufräumen der dynamischen Buttons und Hinweise
     const existingHint = modal.querySelector(".summary-hint");
     const existingRow = modal.querySelector(".summary-btn-row");
     if (existingHint) existingHint.remove();
     if (existingRow) existingRow.remove();
 
-    try { resetFormAndCart(); } catch(e){ /* noop */ }
+    // 🧩 Formular, Auswahl und Warenkorb zurücksetzen
+    try {
+      resetFormAndCart();
+      if (typeof ladeArtikelListe === "function") {
+        await ladeArtikelListe(); // 🔁 Liste wie bei "Liste abrufen" neu laden
+      }
+    } catch(e) {
+      console.warn("Fehler beim Zurücksetzen:", e);
+    }
 
+    // 🔘 Buttons & Anzeige zurücksetzen
     if (confirmBtn) {
       confirmBtn.disabled = false;
       confirmBtn.style.display = "";
@@ -327,9 +344,12 @@ if (cancelBtnEl) {
     if (sendBtn) {
       sendBtn.disabled = true;
     }
+
+    // Fenster schließen
     closeModal();
   };
 }
+
   document.addEventListener("keydown", e => {
     if (e.key === "Escape") closeModal();
   }, { once: true });
