@@ -195,13 +195,13 @@ if (emailInput) {
     });
   }
 
-  function openSummaryModal() {
-    const name = document.getElementById("contact-name")?.value.trim() || "";
-    const email = document.getElementById("contact-email")?.value.trim() || "";
-    const orga = document.getElementById("contact-organisation")?.value.trim() || "";
-    const info = document.getElementById("contact-info")?.value.trim() || "";
-    const von = document.getElementById("date-from")?.value || "";
-    const bis = document.getElementById("date-to")?.value || "";
+function openSummaryModal() {
+  const name = document.getElementById("contact-name")?.value.trim() || "";
+  const email = document.getElementById("contact-email")?.value.trim() || "";
+  const orga = document.getElementById("contact-organisation")?.value.trim() || "";
+  const info = document.getElementById("contact-info")?.value.trim() || "";
+  const von = document.getElementById("date-from")?.value || "";
+  const bis = document.getElementById("date-to")?.value || "";
 
   if (!name || !email || !von || !bis) {
     alert("Bitte alle Pflichtfelder ausfüllen.");
@@ -214,22 +214,19 @@ if (emailInput) {
   }
 
   // Zusammenfassung HTML
-let messageHTML = `<strong>Bitte die Eingaben prüfen:</strong><br>`;
-messageHTML += `<p><strong>Name:</strong><br> ${escapeHtml(name)}<br></p>`;
-messageHTML += `<p><strong>E-Mail:</strong><br> ${escapeHtml(email)}<br></p>`;
-messageHTML += `<p><strong>Organisation:</strong><br> ${escapeHtml(orga)}<br></p>`;
-messageHTML += `<p><strong>Zeitraum:</strong><br> ${escapeHtml(formatDateGerman(von))} bis ${escapeHtml(formatDateGerman(bis))}<br></p>`;
-  // Zeilenumbrüche im Mitteilungstext beibehalten
-  const formattedInfo = info
-    ? escapeHtml(info).replace(/\n/g, "<br>")
-    : "—";
-messageHTML += `<strong>Mitteilung:</strong><br>${formattedInfo}<br><br>`;
-messageHTML += `<strong>Ausgewählte Artikel:</strong><br>`;
+  let messageHTML = `<strong>Bitte die Eingaben prüfen:</strong><br>`;
+  messageHTML += `<p><strong>Name:</strong><br> ${escapeHtml(name)}<br></p>`;
+  messageHTML += `<p><strong>E-Mail:</strong><br> ${escapeHtml(email)}<br></p>`;
+  messageHTML += `<p><strong>Organisation:</strong><br> ${escapeHtml(orga)}<br></p>`;
+  messageHTML += `<p><strong>Zeitraum:</strong><br> ${escapeHtml(formatDateGerman(von))} bis ${escapeHtml(formatDateGerman(bis))}<br></p>`;
+  const formattedInfo = info ? escapeHtml(info).replace(/\n/g, "<br>") : "—";
+  messageHTML += `<strong>Mitteilung:</strong><br>${formattedInfo}<br><br>`;
+  messageHTML += `<strong>Ausgewählte Artikel:</strong><br>`;
   if (aktuelleAuswahl.length === 0) {
     messageHTML += `Keine Artikel ausgewählt.<br>`;
   } else {
-    messageHTML += `<ol>`; // geordnete Liste
-    aktuelleAuswahl.forEach((a, index) => {
+    messageHTML += `<ol>`;
+    aktuelleAuswahl.forEach((a) => {
       messageHTML += `<li>${escapeHtml(a.artikel)} (${escapeHtml(String(a.Auswahl_Anzahl))} x)</li>`;
     });
     messageHTML += `</ol>`;
@@ -242,6 +239,7 @@ messageHTML += `<strong>Ausgewählte Artikel:</strong><br>`;
     modal.id = "summary-modal";
     modal.className = "modal hidden";
     modal.innerHTML = `
+      <div class="modal-overlay"></div>
       <div class="modal-content" role="dialog" aria-modal="true">
         <button class="modal-close">&times;</button>
         <div id="summary-scroll" style="max-height:60vh; overflow-y:auto; margin-bottom:10px; padding-right:4px;"></div>
@@ -257,246 +255,162 @@ messageHTML += `<strong>Ausgewählte Artikel:</strong><br>`;
   const scrollContainer = modal.querySelector("#summary-scroll");
   const statusEl = modal.querySelector("#summary-status");
   const confirmBtn = modal.querySelector("#confirm-btn");
-  scrollContainer.innerHTML = messageHTML;
-  statusEl.textContent = ""; // Status zurücksetzen
+  const cancelBtnEl = modal.querySelector("#cancel-btn");
+  const closeBtn = modal.querySelector(".modal-close");
 
-  // 🧩 Modal korrekt schließen + Overlay-Verhalten
+  scrollContainer.innerHTML = messageHTML;
+  statusEl.textContent = "";
+
+  // Modal-Overlay verhindern Scroll außerhalb
+  const overlay = modal.querySelector(".modal-overlay");
+  if (overlay) overlay.addEventListener("click", (e) => e.stopPropagation());
+  document.body.style.overflow = "hidden";
+
+  // Funktion zum sauberen Schließen
   const closeModal = () => {
     modal.classList.add("hidden");
-    document.body.style.overflow = ""; // Scroll wieder erlauben
-    const hint = modal.querySelector(".summary-hint");
-    if (hint) hint.remove();
-    const btnRow = modal.querySelector(".summary-btn-row");
-    if (btnRow) btnRow.remove();
+    document.body.style.overflow = "";
   };
 
-// Overlay-Blockierung (außerhalb Klicks verhindern)
-let overlay = modal.querySelector(".modal-overlay");
-if (!overlay) {
-  overlay = document.createElement("div");
-  overlay.className = "modal-overlay";
-  modal.prepend(overlay);
-}
-overlay.addEventListener("click", e => e.stopPropagation());
-document.body.style.overflow = "hidden"; // Scroll sperren
+  // Close-Button (X)
+  if (closeBtn) closeBtn.onclick = closeModal;
 
-
-  // Event-Handler
-// Sauberer Close-Handler (auch für das X oben)
-const closeBtn = modal.querySelector(".modal-close");
-if (cancelBtnEl) {
-  cancelBtnEl.onclick = async () => {
-    // 🧹 Aufräumen der dynamischen Buttons und Hinweise
-    const existingHint = modal.querySelector(".summary-hint");
-    const existingRow = modal.querySelector(".summary-btn-row");
-    if (existingHint) existingHint.remove();
-    if (existingRow) existingRow.remove();
-
-    // 🧩 Formular, Auswahl und Warenkorb zurücksetzen
-    try {
+  // Cancel-Button
+  if (cancelBtnEl) {
+    cancelBtnEl.onclick = async () => {
       resetFormAndCart();
-      if (typeof ladeArtikelListe === "function") {
-        await ladeArtikelListe(); // 🔁 Liste wie bei "Liste abrufen" neu laden
+      closeModal();
+      if (confirmBtn) {
+        confirmBtn.disabled = false;
+        confirmBtn.style.display = "";
       }
-    } catch(e) {
-      console.warn("Fehler beim Zurücksetzen:", e);
-    }
-
-    // 🔘 Buttons & Anzeige zurücksetzen
-    if (confirmBtn) {
-      confirmBtn.disabled = false;
-      confirmBtn.style.display = "";
-    }
-    if (sendBtn) {
-      sendBtn.disabled = true;
-    }
-
-    // Fenster schließen
-    closeModal();
-  };
-}
-
-// Cancel-Button (Abbrechen) verwendet gleiche Aufräum-Logik
-const cancelBtnEl = modal.querySelector("#cancel-btn");
-if (cancelBtnEl) {
-  cancelBtnEl.onclick = async () => {
-    // 🧹 Aufräumen der dynamischen Buttons und Hinweise
-    const existingHint = modal.querySelector(".summary-hint");
-    const existingRow = modal.querySelector(".summary-btn-row");
-    if (existingHint) existingHint.remove();
-    if (existingRow) existingRow.remove();
-
-    // 🧩 Formular, Auswahl und Warenkorb zurücksetzen
-    try {
-      resetFormAndCart();
-      if (typeof ladeArtikelListe === "function") {
-        await ladeArtikelListe(); // 🔁 Liste wie bei "Liste abrufen" neu laden
+      if (sendBtn) sendBtn.disabled = true;
+      statusEl.textContent = "";
+      try {
+        if (typeof ladeArtikelListe === "function") await ladeArtikelListe();
+      } catch (e) {
+        console.warn("Fehler beim Zurücksetzen:", e);
       }
-    } catch(e) {
-      console.warn("Fehler beim Zurücksetzen:", e);
-    }
-
-    // 🔘 Buttons & Anzeige zurücksetzen
-    if (confirmBtn) {
-      confirmBtn.disabled = false;
-      confirmBtn.style.display = "";
-    }
-    if (sendBtn) {
-      sendBtn.disabled = true;
-    }
-
-    // Fenster schließen
-    closeModal();
-  };
-}
-
-  document.addEventListener("keydown", e => {
-    if (e.key === "Escape") closeModal();
-  }, { once: true });
-
-  // ✅ Hilfsfunktion zum kompletten Zurücksetzen nach erfolgreichem Versand
-  function resetFormAndCart() {
-    // Formularfelder leeren
-    ["contact-name","contact-email","date-from","date-to","contact-info"].forEach(id => {
-      const f = document.getElementById(id);
-      if (f) f.value = "";
-    });
-
-    // Auswahl & Warenkorb zurücksetzen
-    aktuelleAuswahl = [];
-    document.querySelectorAll(".select-artikel").forEach(cb => cb.checked = false);
-    document.querySelectorAll(".anzahl-input").forEach(input => {
-      input.value = 1;
-      input.classList.remove("input-fehler");
-    });
-
-    if (typeof updateCartIndicator === "function") updateCartIndicator();
-    if (typeof miniCart !== "undefined" && miniCart) miniCart.classList.add("hidden");
+    };
   }
 
-  // OK-Button
-confirmBtn.onclick = async function() {
-  this.disabled = true;
-  const okBtn = this;
-  statusEl.textContent = "⏳ Sende Anfrage...";
-  statusEl.style.color = "#d7060aff";
-
-  // alphabetisch sortierte Kopie der Auswahl für den Flow
-  const ausgewaehltSortiert = [...aktuelleAuswahl].sort((a, b) =>
-    a.artikel.localeCompare(b.artikel, "de", { sensitivity: "base" })
+  // Escape-Key schließt Modal
+  document.addEventListener(
+    "keydown",
+    (e) => {
+      if (e.key === "Escape") closeModal();
+    },
+    { once: true }
   );
 
-  const payload = {
-    name,
-    email,
-    ausleih_von: von,
-    ausleih_bis: bis,
-    info,
-    ausgewaehlt: ausgewaehltSortiert.map(a => ({
-      barcode: a.barcode,
-      artikel: a.artikel,
-      Kategoriename: a.Kategoriename || "",
-      Auswahl_Anzahl: a.Auswahl_Anzahl
-    }))
-  };
-
-  try {
-    sendBtn.disabled = true;
-    const resFlow = await fetch(FLOW_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
-
-    const antwort = await resFlow.json();
-
-    if (antwort.success) {
-      statusEl.textContent = "✅ Anfrage erfolgreich gesendet!";
-      statusEl.style.color = "#06803d";
-
-      // OK-Button deaktivieren & ausblenden
+  // OK-Button (Senden)
+  if (confirmBtn) {
+    confirmBtn.onclick = async function () {
+      const okBtn = this;
       okBtn.disabled = true;
-      okBtn.style.display = "none";
+      statusEl.textContent = "⏳ Sende Anfrage...";
+      statusEl.style.color = "#d7060aff";
 
-      // 🔹 Hinweis + Buttons in einer Zeile
-      const hinweis = document.createElement("p");
-      hinweis.className = "summary-hint";
-      hinweis.style.marginTop = "12px";
-      hinweis.style.color = "#1764c0";
-      hinweis.style.fontSize = "0.9rem";
-      hinweis.textContent = "Sie können nun eine neue Anfrage starten oder abbrechen.";
+      const ausgewaehltSortiert = [...aktuelleAuswahl].sort((a, b) =>
+        a.artikel.localeCompare(b.artikel, "de", { sensitivity: "base" })
+      );
 
-      const btnContainer = document.createElement("div");
-      btnContainer.className = "summary-btn-row";
-      btnContainer.style.display = "flex";
-      btnContainer.style.justifyContent = "center";
-      btnContainer.style.alignItems = "center";
-      btnContainer.style.gap = "10px";
-      btnContainer.style.marginTop = "10px";
-
-      // 🟦 Button: Neue Anfrage
-      const neuBtn = document.createElement("button");
-      neuBtn.textContent = "Neue Anfrage";
-      neuBtn.style.backgroundColor = "#1764c0";
-      neuBtn.style.color = "white";
-      neuBtn.style.borderRadius = "8px";
-      neuBtn.style.padding = "8px 16px";
-      neuBtn.style.border = "none";
-      neuBtn.style.cursor = "pointer";
-      neuBtn.onclick = () => {
-        resetFormAndCart();
-        closeModal();
-        okBtn.disabled = false;
-        okBtn.style.display = "";
-        if (sendBtn) sendBtn.disabled = true; // bleibt deaktiviert, bis neue Auswahl
-        statusEl.textContent = "";
+      const payload = {
+        name,
+        email,
+        ausleih_von: von,
+        ausleih_bis: bis,
+        info,
+        ausgewaehlt: ausgewaehltSortiert.map((a) => ({
+          barcode: a.barcode,
+          artikel: a.artikel,
+          Kategoriename: a.Kategoriename || "",
+          Auswahl_Anzahl: a.Auswahl_Anzahl,
+        })),
       };
 
-      // 🩶 Bestehenden Abbrechen-Button verwenden (nicht duplizieren)
-      const abbrechenBtn = modal.querySelector("#cancel-btn");
-      if (abbrechenBtn) {
-        abbrechenBtn.style.backgroundColor = "#807e7e";
-        abbrechenBtn.style.color = "white";
-        abbrechenBtn.style.borderRadius = "8px";
-        abbrechenBtn.style.padding = "8px 16px";
-        abbrechenBtn.style.border = "none";
-        abbrechenBtn.style.cursor = "pointer";
+      try {
+        sendBtn.disabled = true;
+        const resFlow = await fetch(FLOW_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const antwort = await resFlow.json();
+
+        if (antwort.success) {
+          statusEl.textContent = "✅ Anfrage erfolgreich gesendet!";
+          statusEl.style.color = "#06803d";
+          okBtn.disabled = true;
+          okBtn.style.display = "none";
+
+          const hinweis = document.createElement("p");
+          hinweis.className = "summary-hint";
+          hinweis.style.marginTop = "12px";
+          hinweis.style.color = "#1764c0";
+          hinweis.style.fontSize = "0.9rem";
+          hinweis.textContent =
+            "Sie können nun eine neue Anfrage starten oder abbrechen.";
+
+          const btnContainer = document.createElement("div");
+          btnContainer.className = "summary-btn-row";
+          btnContainer.style.display = "flex";
+          btnContainer.style.justifyContent = "center";
+          btnContainer.style.alignItems = "center";
+          btnContainer.style.gap = "10px";
+          btnContainer.style.marginTop = "10px";
+
+          const neuBtn = document.createElement("button");
+          neuBtn.textContent = "Neue Anfrage";
+          neuBtn.style.backgroundColor = "#1764c0";
+          neuBtn.style.color = "white";
+          neuBtn.style.borderRadius = "8px";
+          neuBtn.style.padding = "8px 16px";
+          neuBtn.style.border = "none";
+          neuBtn.style.cursor = "pointer";
+
+          neuBtn.onclick = () => {
+            resetFormAndCart();
+            closeModal();
+            okBtn.disabled = false;
+            okBtn.style.display = "";
+            checkFormFields();
+            statusEl.textContent = "";
+          };
+
+          btnContainer.appendChild(neuBtn);
+          if (cancelBtnEl) btnContainer.appendChild(cancelBtnEl);
+
+          const existingHint = modal.querySelector(".summary-hint");
+          const existingRow = modal.querySelector(".summary-btn-row");
+          if (existingHint) existingHint.remove();
+          if (existingRow) existingRow.remove();
+
+          statusEl.insertAdjacentElement("afterend", hinweis);
+          hinweis.insertAdjacentElement("afterend", btnContainer);
+        } else {
+          statusEl.textContent =
+            "❌ Anfrage konnte nicht verarbeitet werden: " +
+            (antwort.message || "");
+          statusEl.style.color = "#d00";
+          okBtn.disabled = false;
+          if (sendBtn) sendBtn.disabled = false;
+        }
+      } catch (err) {
+        console.error(err);
+        statusEl.textContent =
+          "❌ Anfrage konnte nicht gesendet werden. Bitte prüfen Sie Ihre Internetverbindung.";
+        statusEl.style.color = "#d00";
+        okBtn.disabled = false;
+        if (sendBtn) sendBtn.disabled = false;
+      } finally {
+        checkFormFields();
       }
-
-      // alte Hinweise entfernen, falls mehrfach gesendet
-      const existingHint = modal.querySelector(".summary-hint");
-      const existingRow = modal.querySelector(".summary-btn-row");
-      if (existingHint) existingHint.remove();
-      if (existingRow) existingRow.remove();
-
-      btnContainer.appendChild(neuBtn);
-      if (abbrechenBtn) btnContainer.appendChild(abbrechenBtn);
-
-      statusEl.insertAdjacentElement("afterend", hinweis);
-      hinweis.insertAdjacentElement("afterend", btnContainer);
-
-      // Send-Button bleibt deaktiviert, solange Modal geöffnet ist
-    } else {
-      statusEl.textContent =
-        "❌ Anfrage konnte nicht verarbeitet werden: " + (antwort.message || "");
-      statusEl.style.color = "#d00";
-      okBtn.disabled = false;
-      if (sendBtn) sendBtn.disabled = false;
-    }
-  } catch (err) {
-    console.error(err);
-    statusEl.textContent =
-      "❌ Anfrage konnte nicht gesendet werden. Bitte prüfen Sie Ihre Internetverbindung.";
-    statusEl.style.color = "#d00";
-    okBtn.disabled = false;
-    if (sendBtn) sendBtn.disabled = false;
-  } finally {
-    checkFormFields();
+    };
   }
-};
+
   modal.classList.remove("hidden");
 }
-
 
   // Initialer Zustand
   checkFormFields();
