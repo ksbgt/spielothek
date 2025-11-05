@@ -417,6 +417,32 @@ button:hover { transform: translateY(-2px); }
   opacity: 0.7;
 }
 
+/* Horizontale Button-Leiste im Erfolgsfenster */
+#summary-modal .success-buttons {
+  display: flex;
+  justify-content: center;   /* zentriert beide Buttons */
+  align-items: center;       /* vertikal auf gleiche Höhe */
+  gap: 10px;                 /* Abstand zwischen Buttons */
+  margin-top: 15px;
+}
+
+#summary-modal .success-buttons button {
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: none;
+}
+
+#summary-modal .success-buttons .btn-primary {
+  background-color: #1764c0;
+  color: #fff;
+}
+
+#summary-modal .success-buttons .btn-secondary {
+  background-color: #807e7e;
+  color: #fff;
+}
+
 #details-modal { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; z-index:2000; }
 .modal-overlay { position:absolute; inset:0; background:rgba(0,0,0,0.6); }
 .modal-content { position:relative; background:#fff; padding:20px; border-radius:12px; max-width:400px; width:90%; z-index:2001; box-shadow:0 6px 20px rgba(0,0,0,0.3); text-align:left; animation:fadeIn 0.3s ease; }

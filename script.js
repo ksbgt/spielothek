@@ -333,34 +333,61 @@ if (antwort.success) {
   okBtn.disabled = true;
   okBtn.style.display = "none";
 
-  // 🔹 Hinweis + neuer Button                   
-  const neuBtn = document.createElement("button");
-  neuBtn.textContent = "Neue Anfrage";
-  neuBtn.className = "btn btn-primary mt-3";
-  neuBtn.style.backgroundColor = "#1764c0";
-  neuBtn.style.color = "white";
-  neuBtn.style.borderRadius = "8px";
-  neuBtn.style.padding = "8px 16px";
-  neuBtn.onclick = () => {
-    resetFormAndCart();
-    closeSummaryModal();
+// 🔹 Hinweis + Buttons in einer Zeile
+const hinweis = document.createElement("p");
+hinweis.style.marginTop = "12px";
+hinweis.style.color = "#1764c0";
+hinweis.style.fontSize = "0.9rem";
+hinweis.textContent = "Sie können nun eine neue Anfrage starten oder abbrechen.";
 
-    // alten Button wieder aktivieren & zeigen
-    okBtn.disabled = false;
-    okBtn.style.display = "";
-    statusEl.textContent = "";
-  };
+// Button-Container (horizontale Anordnung)
+const btnContainer = document.createElement("div");
+btnContainer.style.display = "flex";
+btnContainer.style.justifyContent = "center";
+btnContainer.style.alignItems = "center";
+btnContainer.style.gap = "10px";
+btnContainer.style.marginTop = "10px";
 
-  // Hinweis für Nutzer
-  const hinweis = document.createElement("p");
-  // hinweis.textContent = "Sie können nun eine neue Anfrage starten.";
-  hinweis.style.marginTop = "12px";
-  hinweis.style.color = "#1764c0";
-  hinweis.style.fontSize = "0.9rem";
+// 🟦 Button: Neue Anfrage
+const neuBtn = document.createElement("button");
+neuBtn.textContent = "Neue Anfrage";
+neuBtn.style.backgroundColor = "#1764c0";
+neuBtn.style.color = "white";
+neuBtn.style.borderRadius = "8px";
+neuBtn.style.padding = "8px 16px";
+neuBtn.style.border = "none";
+neuBtn.style.cursor = "pointer";
+neuBtn.onclick = () => {
+  resetFormAndCart();
+  closeSummaryModal();
+  okBtn.disabled = false;
+  okBtn.style.display = "";
+  statusEl.textContent = "";
+};
 
-  // beides unter die Erfolgsmeldung setzen
-  statusEl.insertAdjacentElement("afterend", hinweis);
-  hinweis.insertAdjacentElement("afterend", neuBtn);
+// 🩶 Button: Abbrechen
+const abbrechenBtn = document.createElement("button");
+abbrechenBtn.textContent = "Abbrechen";
+abbrechenBtn.style.backgroundColor = "#807e7e";
+abbrechenBtn.style.color = "white";
+abbrechenBtn.style.borderRadius = "8px";
+abbrechenBtn.style.padding = "8px 16px";
+abbrechenBtn.style.border = "none";
+abbrechenBtn.style.cursor = "pointer";
+abbrechenBtn.onclick = () => {
+  closeSummaryModal();
+  okBtn.disabled = false;
+  okBtn.style.display = "";
+};
+
+// Buttons in den Container einfügen
+btnContainer.appendChild(neuBtn);
+btnContainer.appendChild(abbrechenBtn);
+
+// Alles einfügen (unter Erfolgsmeldung)
+statusEl.insertAdjacentElement("afterend", hinweis);
+hinweis.insertAdjacentElement("afterend", btnContainer);
+
 } else {
   statusEl.textContent = "❌ Anfrage konnte nicht verarbeitet werden: " + (antwort.message || "");
   statusEl.style.color = "#d00";
