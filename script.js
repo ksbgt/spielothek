@@ -282,8 +282,54 @@ document.body.style.overflow = "hidden"; // Scroll sperren
 
 
   // Event-Handler
-  modal.querySelector(".modal-close").onclick = closeModal;
-  modal.querySelector("#cancel-btn").onclick = closeModal;
+// Sauberer Close-Handler (auch für das X oben)
+const closeBtn = modal.querySelector(".modal-close");
+if (closeBtn) {
+  closeBtn.onclick = () => {
+    // Aufräumen der dynamischen Elemente, falls vorhanden
+    const existingHint = modal.querySelector(".summary-hint");
+    const existingRow = modal.querySelector(".summary-btn-row");
+    if (existingHint) existingHint.remove();
+    if (existingRow) existingRow.remove();
+
+    // Formular & Warenkorb in sicherem Zustand zurücksetzen
+    try { resetFormAndCart(); } catch(e){ /* noop */ }
+
+    // Buttons/Status zurücksetzen
+    if (confirmBtn) {
+      confirmBtn.disabled = false;
+      confirmBtn.style.display = "";
+    }
+    if (sendBtn) {
+      // sendBtn bleibt deaktiviert, bis Pflichtfelder/Auswahl wieder vorhanden sind
+      sendBtn.disabled = true;
+    }
+    // Modal wirklich schließen und Scroll wieder erlauben
+    closeModal();
+  };
+}
+
+// Cancel-Button (Abbrechen) verwendet gleiche Aufräum-Logik
+const cancelBtnEl = modal.querySelector("#cancel-btn");
+if (cancelBtnEl) {
+  cancelBtnEl.onclick = () => {
+    const existingHint = modal.querySelector(".summary-hint");
+    const existingRow = modal.querySelector(".summary-btn-row");
+    if (existingHint) existingHint.remove();
+    if (existingRow) existingRow.remove();
+
+    try { resetFormAndCart(); } catch(e){ /* noop */ }
+
+    if (confirmBtn) {
+      confirmBtn.disabled = false;
+      confirmBtn.style.display = "";
+    }
+    if (sendBtn) {
+      sendBtn.disabled = true;
+    }
+    closeModal();
+  };
+}
   document.addEventListener("keydown", e => {
     if (e.key === "Escape") closeModal();
   }, { once: true });
