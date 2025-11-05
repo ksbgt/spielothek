@@ -443,6 +443,44 @@ button:hover { transform: translateY(-2px); }
   color: #fff;
 }
 
+/* 🔹 Buttonreihe nach erfolgreichem Senden */
+.summary-btn-row {
+  display: flex;
+  justify-content: center;   /* Buttons nebeneinander zentriert */
+  gap: 12px;                 /* Abstand zwischen Buttons */
+  margin-top: 16px;
+  flex-wrap: wrap;           /* Bei kleinen Bildschirmen umbrechen */
+}
+
+.summary-btn-row button {
+  flex: 1 1 auto;
+  min-width: 120px;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+/* 🔹 Primärer Button: Neue Anfrage */
+.summary-btn-row .btn-primary {
+  background-color: #1764c0;
+  color: #fff;
+}
+.summary-btn-row .btn-primary:hover {
+  background-color: #0d4a91;
+}
+
+/* 🔹 Sekundärer Button: Abbrechen */
+.summary-btn-row .btn-secondary {
+  background-color: #777;
+  color: #fff;
+}
+.summary-btn-row .btn-secondary:hover {
+  background-color: #5e5e5e;
+}
+
 #details-modal { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; z-index:2000; }
 .modal-overlay { position:absolute; inset:0; background:rgba(0,0,0,0.6); }
 .modal-content { position:relative; background:#fff; padding:20px; border-radius:12px; max-width:400px; width:90%; z-index:2001; box-shadow:0 6px 20px rgba(0,0,0,0.3); text-align:left; animation:fadeIn 0.3s ease; }

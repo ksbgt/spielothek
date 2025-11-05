@@ -260,7 +260,26 @@ messageHTML += `<strong>Ausgewählte Artikel:</strong><br>`;
   scrollContainer.innerHTML = messageHTML;
   statusEl.textContent = ""; // Status zurücksetzen
 
-  const closeModal = () => modal.classList.add("hidden");
+  // 🧩 Modal korrekt schließen + Overlay-Verhalten
+  const closeModal = () => {
+    modal.classList.add("hidden");
+    document.body.style.overflow = ""; // Scroll wieder erlauben
+    const hint = modal.querySelector(".summary-hint");
+    if (hint) hint.remove();
+    const btnRow = modal.querySelector(".summary-btn-row");
+    if (btnRow) btnRow.remove();
+  };
+
+// Overlay-Blockierung (außerhalb Klicks verhindern)
+let overlay = modal.querySelector(".modal-overlay");
+if (!overlay) {
+  overlay = document.createElement("div");
+  overlay.className = "modal-overlay";
+  modal.prepend(overlay);
+}
+overlay.addEventListener("click", e => e.stopPropagation());
+document.body.style.overflow = "hidden"; // Scroll sperren
+
 
   // Event-Handler
   modal.querySelector(".modal-close").onclick = closeModal;
@@ -290,11 +309,11 @@ messageHTML += `<strong>Ausgewählte Artikel:</strong><br>`;
   }
 
   // OK-Button
-  confirmBtn.onclick = async function() {
-    this.disabled = true;
-    const okBtn = this;
-    statusEl.textContent = "⏳ Sende Anfrage...";
-    statusEl.style.color = "#d7060aff";
+confirmBtn.onclick = async function() {
+  this.disabled = true;
+  const okBtn = this;
+  statusEl.textContent = "⏳ Sende Anfrage...";
+  statusEl.style.color = "#d7060aff";
 
   // alphabetisch sortierte Kopie der Auswahl für den Flow
   const ausgewaehltSortiert = [...aktuelleAuswahl].sort((a, b) =>
@@ -315,94 +334,100 @@ messageHTML += `<strong>Ausgewählte Artikel:</strong><br>`;
     }))
   };
 
-    try {
-      sendBtn.disabled = true;
-      const resFlow = await fetch(FLOW_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
+  try {
+    sendBtn.disabled = true;
+    const resFlow = await fetch(FLOW_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
 
-      const antwort = await resFlow.json();
+    const antwort = await resFlow.json();
 
-if (antwort.success) {
-  statusEl.textContent = "✅ Anfrage erfolgreich gesendet!";
-  statusEl.style.color = "#06803d";
+    if (antwort.success) {
+      statusEl.textContent = "✅ Anfrage erfolgreich gesendet!";
+      statusEl.style.color = "#06803d";
 
-  // Alten OK-Button deaktivieren & ausblenden
-  okBtn.disabled = true;
-  okBtn.style.display = "none";
+      // OK-Button deaktivieren & ausblenden
+      okBtn.disabled = true;
+      okBtn.style.display = "none";
 
-// 🔹 Hinweis + Buttons in einer Zeile
-const hinweis = document.createElement("p");
-hinweis.style.marginTop = "12px";
-hinweis.style.color = "#1764c0";
-hinweis.style.fontSize = "0.9rem";
-hinweis.textContent = "Sie können nun eine neue Anfrage starten oder abbrechen.";
+      // 🔹 Hinweis + Buttons in einer Zeile
+      const hinweis = document.createElement("p");
+      hinweis.className = "summary-hint";
+      hinweis.style.marginTop = "12px";
+      hinweis.style.color = "#1764c0";
+      hinweis.style.fontSize = "0.9rem";
+      hinweis.textContent = "Sie können nun eine neue Anfrage starten oder abbrechen.";
 
-// Container für beide Buttons (bestehender Abbrechen-Button + Neuer Anfrage-Button)
-const btnContainer = document.createElement("div");
-btnContainer.style.display = "flex";
-btnContainer.style.justifyContent = "center";
-btnContainer.style.alignItems = "center";
-btnContainer.style.gap = "10px";
-btnContainer.style.marginTop = "10px";
+      const btnContainer = document.createElement("div");
+      btnContainer.className = "summary-btn-row";
+      btnContainer.style.display = "flex";
+      btnContainer.style.justifyContent = "center";
+      btnContainer.style.alignItems = "center";
+      btnContainer.style.gap = "10px";
+      btnContainer.style.marginTop = "10px";
 
-// 🟦 Bestehenden Abbrechen-Button holen
-const abbrechenBtn = modal.querySelector("#cancel-btn");
+      // 🟦 Button: Neue Anfrage
+      const neuBtn = document.createElement("button");
+      neuBtn.textContent = "Neue Anfrage";
+      neuBtn.style.backgroundColor = "#1764c0";
+      neuBtn.style.color = "white";
+      neuBtn.style.borderRadius = "8px";
+      neuBtn.style.padding = "8px 16px";
+      neuBtn.style.border = "none";
+      neuBtn.style.cursor = "pointer";
+      neuBtn.onclick = () => {
+        resetFormAndCart();
+        closeModal();
+        okBtn.disabled = false;
+        okBtn.style.display = "";
+        if (sendBtn) sendBtn.disabled = true; // bleibt deaktiviert, bis neue Auswahl
+        statusEl.textContent = "";
+      };
 
-// 🟦 Button: Neue Anfrage (neu erzeugen)
-const neuBtn = document.createElement("button");
-neuBtn.textContent = "Neue Anfrage";
-neuBtn.style.backgroundColor = "#1764c0";
-neuBtn.style.color = "white";
-neuBtn.style.borderRadius = "8px";
-neuBtn.style.padding = "8px 16px";
-neuBtn.style.border = "none";
-neuBtn.style.cursor = "pointer";
-neuBtn.onclick = () => {
-  resetFormAndCart();
-  closeModal();
-  okBtn.disabled = false;
-  okBtn.style.display = "";
-  statusEl.textContent = "";
-};
+      // 🩶 Bestehenden Abbrechen-Button verwenden (nicht duplizieren)
+      const abbrechenBtn = modal.querySelector("#cancel-btn");
+      if (abbrechenBtn) {
+        abbrechenBtn.style.backgroundColor = "#807e7e";
+        abbrechenBtn.style.color = "white";
+        abbrechenBtn.style.borderRadius = "8px";
+        abbrechenBtn.style.padding = "8px 16px";
+        abbrechenBtn.style.border = "none";
+        abbrechenBtn.style.cursor = "pointer";
+      }
 
-// Bestehenden Abbrechen-Button visuell anpassen
-if (abbrechenBtn) {
-  abbrechenBtn.style.backgroundColor = "#807e7e";
-  abbrechenBtn.style.color = "white";
-  abbrechenBtn.style.borderRadius = "8px";
-  abbrechenBtn.style.padding = "8px 16px";
-  abbrechenBtn.style.border = "none";
-  abbrechenBtn.style.cursor = "pointer";
-}
+      // alte Hinweise entfernen, falls mehrfach gesendet
+      const existingHint = modal.querySelector(".summary-hint");
+      const existingRow = modal.querySelector(".summary-btn-row");
+      if (existingHint) existingHint.remove();
+      if (existingRow) existingRow.remove();
 
-// Buttons in den Container einfügen
-btnContainer.appendChild(neuBtn);
-if (abbrechenBtn) btnContainer.appendChild(abbrechenBtn);
+      btnContainer.appendChild(neuBtn);
+      if (abbrechenBtn) btnContainer.appendChild(abbrechenBtn);
 
-// Alles einfügen (unter Erfolgsmeldung)
-statusEl.insertAdjacentElement("afterend", hinweis);
-hinweis.insertAdjacentElement("afterend", btnContainer);
+      statusEl.insertAdjacentElement("afterend", hinweis);
+      hinweis.insertAdjacentElement("afterend", btnContainer);
 
-} else {
-  statusEl.textContent = "❌ Anfrage konnte nicht verarbeitet werden: " + (antwort.message || "");
-  statusEl.style.color = "#d00";
-  okBtn.disabled = false; // Fehler -> Reaktivieren erlaubt
-}
-
-    } catch(err) {
-      console.error(err);
-      statusEl.textContent = "❌ Anfrage konnte nicht gesendet werden. Bitte prüfen Sie Ihre Internetverbindung.";
+      // Send-Button bleibt deaktiviert, solange Modal geöffnet ist
+    } else {
+      statusEl.textContent =
+        "❌ Anfrage konnte nicht verarbeitet werden: " + (antwort.message || "");
       statusEl.style.color = "#d00";
-      okBtn.disabled = false; // Fehler -> Reaktivieren erlaubt
-    } finally {
-      sendBtn.disabled = false;
-      checkFormFields();
+      okBtn.disabled = false;
+      if (sendBtn) sendBtn.disabled = false;
     }
-  };
-
+  } catch (err) {
+    console.error(err);
+    statusEl.textContent =
+      "❌ Anfrage konnte nicht gesendet werden. Bitte prüfen Sie Ihre Internetverbindung.";
+    statusEl.style.color = "#d00";
+    okBtn.disabled = false;
+    if (sendBtn) sendBtn.disabled = false;
+  } finally {
+    checkFormFields();
+  }
+};
   modal.classList.remove("hidden");
 }
 
