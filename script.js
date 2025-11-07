@@ -41,15 +41,14 @@ function formatDateGerman(isoDateStr) {
 // ===========================
 // DOMContentLoaded
 // ===========================
-
 document.addEventListener("DOMContentLoaded", () => {
-// ==========================================
-// 🔍 Bereich aus URL-Parameter lesen
-// ==========================================
+  // ==========================================
+  // 🔍 Bereich aus URL-Parameter lesen
+  // ==========================================
   const params = new URLSearchParams(window.location.search);
   const urlBereich = params.get("bereich") || "";
 
-// Optional: Bereichshinweis im Browser-Log
+  // Optional: Bereichshinweis anzeigen (falls div vorhanden)
   console.log("Aktiver Bereich:", urlBereich);
   const bereichHinweis = document.getElementById("bereich-hinweis");
   if (bereichHinweis && urlBereich) {
@@ -62,7 +61,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const closeMiniCart = document.getElementById("closeMiniCart");
   const sendBtn = document.getElementById("sendCartBtn");
 
-// 1️⃣ Artikel-Liste laden
+  // 1️⃣ Artikel-Liste laden
   if (btn) {
     btn.addEventListener("click", async () => {
       if (contacts.length > 0 || aktuelleAuswahl.length > 0) {
@@ -94,8 +93,7 @@ document.addEventListener("DOMContentLoaded", () => {
           gefilterteDaten = daten.filter(item => item.bereich === urlBereich);
         }
 
-      contacts = gefilterteDaten.map(item => {
-
+        contacts = gefilterteDaten.map(item => {
           const bildPfad = item.bild
             ? (item.bild.startsWith("/") ? BASE_URL + item.bild : BASE_URL + "/" + item.bild)
             : BASE_URL + "/Standardbilder/standard.jpg";
@@ -118,12 +116,14 @@ document.addEventListener("DOMContentLoaded", () => {
         btn.disabled = false;
         btn.textContent = "Liste abrufen";
       }
-      // 🔁 Wenn ein Bereich in der URL angegeben ist, automatisch laden
-      if (urlBereich) {
-        const btn = document.getElementById("btn");
-        if (btn) btn.click();
-      }  
     });
+
+    // ✅ Auto-Load gehört HIERHIN (außerhalb des Eventlisteners)
+    if (urlBereich) {
+      console.log("Auto-Load aktiv für Bereich:", urlBereich);
+      btn.click();                // Klickt automatisch
+      btn.style.display = "none"; // Optional: Button ausblenden
+    }
   }
 
   // 2️⃣ Warenkorb-Indikator togglen
@@ -184,7 +184,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Initial
   checkFormFields();
-});
+}); // Ende DOMContentLoaded
 
 // ===========================
 // Modal & Versand
@@ -255,43 +255,42 @@ function openSummaryModal() {
   cancelBtn.onclick = () => { resetFormAndCart(); closeModal(); };
   document.addEventListener("keydown", e => { if(e.key==="Escape") closeModal(); }, { once:true });
 
-confirmBtn.onclick = async () => {
-  confirmBtn.disabled = true;
-  statusEl.textContent = "⏳ Sende Anfrage...";
-  statusEl.style.color = "#d7060aff";
+  confirmBtn.onclick = async () => {
+    confirmBtn.disabled = true;
+    statusEl.textContent = "⏳ Sende Anfrage...";
+    statusEl.style.color = "#d7060aff";
 
-  const ausgewaehltSortiert = [...aktuelleAuswahl].sort((a,b) => a.artikel.localeCompare(b.artikel,"de",{sensitivity:"base"}));
-  const payload = { name, email, ausleih_von: von, ausleih_bis: bis, info, ausgewaehlt: ausgewaehltSortiert.map(a => ({
-    barcode: a.barcode,
-    artikel: a.artikel,
-    Kategoriename: a.Kategoriename||"",
-    Auswahl_Anzahl: a.Auswahl_Anzahl
-  }))};
+    const ausgewaehltSortiert = [...aktuelleAuswahl].sort((a,b) => a.artikel.localeCompare(b.artikel,"de",{sensitivity:"base"}));
+    const payload = { name, email, ausleih_von: von, ausleih_bis: bis, info, ausgewaehlt: ausgewaehltSortiert.map(a => ({
+      barcode: a.barcode,
+      artikel: a.artikel,
+      Kategoriename: a.Kategoriename||"",
+      Auswahl_Anzahl: a.Auswahl_Anzahl
+    }))};
 
-  try {
-    const resFlow = await fetch(FLOW_URL, { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(payload) });
-    const antwort = await resFlow.json();
+    try {
+      const resFlow = await fetch(FLOW_URL, { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(payload) });
+      const antwort = await resFlow.json();
 
-    if (antwort.success) {
-      statusEl.textContent = "✅ Anfrage erfolgreich gesendet!";
-      statusEl.style.color = "#06803d";
-      // Senden-Button ausblenden
-      confirmBtn.style.display = "none";
+      if (antwort.success) {
+        statusEl.textContent = "✅ Anfrage erfolgreich gesendet!";
+        statusEl.style.color = "#06803d";
+        // Senden-Button ausblenden
+        confirmBtn.style.display = "none";
 
-      // Die Auswahl wird **noch nicht** zurückgesetzt – passiert erst bei Abbrechen
-    } else {
-      statusEl.textContent = "❌ Anfrage konnte nicht verarbeitet werden: " + (antwort.message||"");
-      statusEl.style.color = "#d00";
+        // Die Auswahl wird **noch nicht** zurückgesetzt – passiert erst bei Abbrechen
+      } else {
+        statusEl.textContent = "❌ Anfrage konnte nicht verarbeitet werden: " + (antwort.message||"");
+        statusEl.style.color = "#d00";
+        confirmBtn.disabled=false;
+      }
+    } catch(err) {
+      console.error(err);
+      statusEl.textContent="❌ Anfrage konnte nicht gesendet werden. Bitte prüfen Sie Ihre Internetverbindung.";
+      statusEl.style.color="#d00";
       confirmBtn.disabled=false;
-    }
-  } catch(err) {
-    console.error(err);
-    statusEl.textContent="❌ Anfrage konnte nicht gesendet werden. Bitte prüfen Sie Ihre Internetverbindung.";
-    statusEl.style.color="#d00";
-    confirmBtn.disabled=false;
-  } finally { checkFormFields(); }
-};
-
+    } finally { checkFormFields(); }
+  };
 }
 
 // ===========================
@@ -488,4 +487,3 @@ function resetFormAndCart(){
 
 // ===========================
 // Ende script.js
-// ===========================
