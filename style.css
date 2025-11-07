@@ -548,6 +548,38 @@ button:hover { transform: translateY(-2px); }
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
+/* ===== Footer ===== */
+#page-footer {
+  background: #f3f3f3;
+  border-top: 1px solid #ccc;
+  color: #333;
+  text-align: center;
+  padding: 12px 8px;
+  font-size: 0.9rem;
+  margin-top: 40px;
+}
+
+#page-footer .footer-content {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+#page-footer a {
+  color: #0066cc;
+  text-decoration: none;
+}
+
+#page-footer a:hover {
+  text-decoration: underline;
+}
+
+.footer-sep {
+  color: #999;
+}
+
 /* Universelle hidden-Klasse (wichtig!) */
 .hidden { display: none !important; }
 
