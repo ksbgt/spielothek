@@ -41,14 +41,28 @@ function formatDateGerman(isoDateStr) {
 // ===========================
 // DOMContentLoaded
 // ===========================
+
 document.addEventListener("DOMContentLoaded", () => {
+// ==========================================
+// 🔍 Bereich aus URL-Parameter lesen
+// ==========================================
+  const params = new URLSearchParams(window.location.search);
+  const urlBereich = params.get("bereich") || "";
+
+// Optional: Bereichshinweis im Browser-Log
+  console.log("Aktiver Bereich:", urlBereich);
+  const bereichHinweis = document.getElementById("bereich-hinweis");
+  if (bereichHinweis && urlBereich) {
+    bereichHinweis.textContent = `Bereich: ${urlBereich}`;
+  }
+
   const btn = document.getElementById("btn"); // „Liste abrufen“
   const cartIndicator = document.getElementById("cart-indicator");
   const miniCart = document.getElementById("mini-cart");
   const closeMiniCart = document.getElementById("closeMiniCart");
   const sendBtn = document.getElementById("sendCartBtn");
 
-  // 1️⃣ Artikel-Liste laden
+// 1️⃣ Artikel-Liste laden
   if (btn) {
     btn.addEventListener("click", async () => {
       if (contacts.length > 0 || aktuelleAuswahl.length > 0) {
@@ -74,7 +88,14 @@ document.addEventListener("DOMContentLoaded", () => {
         const resLocal = await fetch("Exports/Artikel.json");
         const daten = await resLocal.json();
 
-        contacts = daten.map(item => {
+        // 🔍 Nur Artikel des aktiven Bereichs laden (wenn Parameter angegeben)
+        let gefilterteDaten = daten;
+        if (urlBereich) {
+          gefilterteDaten = daten.filter(item => item.bereich === urlBereich);
+        }
+
+      contacts = gefilterteDaten.map(item => {
+
           const bildPfad = item.bild
             ? (item.bild.startsWith("/") ? BASE_URL + item.bild : BASE_URL + "/" + item.bild)
             : BASE_URL + "/Standardbilder/standard.jpg";
@@ -97,6 +118,11 @@ document.addEventListener("DOMContentLoaded", () => {
         btn.disabled = false;
         btn.textContent = "Liste abrufen";
       }
+      // 🔁 Wenn ein Bereich in der URL angegeben ist, automatisch laden
+      if (urlBereich) {
+        const btn = document.getElementById("btn");
+        if (btn) btn.click();
+      }  
     });
   }
 
