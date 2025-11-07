@@ -46,11 +46,12 @@ document.addEventListener("DOMContentLoaded", () => {
   // 🔍 Bereich aus URL-Parameter lesen
   // ==========================================
   const params = new URLSearchParams(window.location.search);
-  const urlBereich = params.get("bereich") || "";
+  // const urlBereich = params.get("bereich") || "";
+  const urlBereich = params.get("bereich") || ""; 
 
   const bereichHinweis = document.getElementById("bereich-hinweis");
     if (bereichHinweis && urlBereich) {
-      bereichHinweis.textContent = urlBereich; // oder z. B. "01 Spielothek"
+      bereichHinweis.textContent = urlBereich.slice(3); // oder z. B. "01 Spielothek"
     }
 
   const btn = document.getElementById("btn"); // „Liste abrufen“
