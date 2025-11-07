@@ -11,6 +11,12 @@ body {
 
 h1 { margin-bottom: 20px; }
 
+.linie-01 {
+  width: 200px; /* oder 75% */
+  height: 3px;
+  background-color: red;
+}
+
 button {
   background-color: rgb(225, 65, 145);
   color: white;
