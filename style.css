@@ -12,9 +12,9 @@ body {
 h1 { margin-bottom: 20px; }
 
 .linie-01 {
-  width:  75%; /* 300px; oder 75% */
-  height: 2px;
-  background-color: #004b93;;
+  width:  60%; /* 300px; oder 75% */
+  height: 1px;
+  background-color: rgba(0,0,0,1);
 }
 
 button {
