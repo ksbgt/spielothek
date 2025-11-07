@@ -48,12 +48,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const params = new URLSearchParams(window.location.search);
   const urlBereich = params.get("bereich") || "";
 
-  // Optional: Bereichshinweis anzeigen (falls div vorhanden)
-  console.log("Aktiver Bereich:", urlBereich);
   const bereichHinweis = document.getElementById("bereich-hinweis");
-  if (bereichHinweis && urlBereich) {
-    bereichHinweis.textContent = `Bereich: ${urlBereich}`;
-  }
+    if (bereichHinweis && urlBereich) {
+      bereichHinweis.textContent = urlBereich; // oder z. B. "01 Spielothek"
+    }
 
   const btn = document.getElementById("btn"); // „Liste abrufen“
   const cartIndicator = document.getElementById("cart-indicator");
