@@ -399,6 +399,17 @@ function initCartEvents() {
   });
 
   updateCartIndicator();
+  
+  // 🩹 Fix: Löschen der "1" auf Tablets ermöglichen
+  document.querySelectorAll(".anzahl-input").forEach(input => {
+    input.addEventListener("beforeinput", (e) => {
+      // Wenn der Nutzer die letzte Ziffer löscht (z. B. die "1"), erlauben wir kurz ein leeres Feld
+      if (e.inputType === "deleteContentBackward" && input.value.length === 1) {
+        input.value = "";
+        e.preventDefault(); // verhindert, dass Browser "1" sofort zurücksetzt
+      }
+    });
+  });
 }
 
 // ===========================
