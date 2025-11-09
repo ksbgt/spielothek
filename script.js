@@ -42,74 +42,52 @@ function formatDateGerman(isoDateStr) {
 // DOMContentLoaded
 // ===========================
 document.addEventListener("DOMContentLoaded", () => {
-  // ==========================================
-  // 🔍 Bereich aus URL-Parameter lesen
-  // ==========================================
+
   const params = new URLSearchParams(window.location.search);
-  // const urlBereich = params.get("bereich") || "";
-  const urlBereich = params.get("bereich") || ""; 
+  const urlBereich = params.get("bereich") || "";
 
   const bereichHinweis = document.getElementById("bereich-hinweis");
-    if (bereichHinweis && urlBereich) {
-      bereichHinweis.textContent = urlBereich.slice(3); // oder z. B. "01 Spielothek"
-    }
+  if (bereichHinweis && urlBereich) {
+    bereichHinweis.textContent = urlBereich.slice(3); // z. B. "Spielothek"
+  }
 
-  const btn = document.getElementById("btn"); // „Liste abrufen“
-  const cartIndicator = document.getElementById("cart-indicator");
-  const miniCart = document.getElementById("mini-cart");
-  const closeMiniCart = document.getElementById("closeMiniCart");
-  const sendBtn = document.getElementById("sendCartBtn");
+  const btn = document.getElementById("btn");
 
   // 1️⃣ Artikel-Liste laden
   if (btn) {
     btn.addEventListener("click", async () => {
-      if (contacts.length > 0 || aktuelleAuswahl.length > 0) {
-        const confirmReload = confirm(
-          "Die aktuelle Auswahlliste wird gelöscht und neu geladen.\n\nMöchten Sie fortfahren?"
-        );
-        if (!confirmReload) return;
-      }
-
       try {
         btn.disabled = true;
         btn.textContent = "Lade...";
 
-        aktuelleAuswahl = [];
-        updateCartIndicator();
+      const resLocal = await fetch("Exports/Artikel.json");
+      const daten = await resLocal.json();
 
-        ["contact-name", "contact-email", "date-from", "date-to", "contact-info", "contact-organisation"].forEach(id => {
-          const f = document.getElementById(id);
-          if (f) f.value = "";
-        });
+      // 🔍 Testausgabe
+      console.log("Geladene Datensätze:", daten.length);
+      console.log("Beispiel (1. Datensatz):", daten[0]);
 
-        const BASE_URL = "https://ksbgt.github.io/spielothek/";
-        const resLocal = await fetch("Exports/Artikel.json");
-        const daten = await resLocal.json();
+      // 🔍 Nur Artikel des aktiven Bereichs laden
+      let gefilterteDaten = daten;
+      if (urlBereich) {
+        gefilterteDaten = daten.filter(item => item.bereich === urlBereich);
+        console.log("Gefiltert:", gefilterteDaten.length, "Artikel für Bereich", urlBereich);
+        console.log("Erste gefilterte Zeile:", gefilterteDaten[0]);
+      }
 
-        // 🔍 Nur Artikel des aktiven Bereichs laden (wenn Parameter angegeben)
-        let gefilterteDaten = daten;
-        if (urlBereich) {
-          gefilterteDaten = daten.filter(item => item.bereich === urlBereich);
-        }
-
-      contacts = gefilterteDaten.map(item => {
-        const bildPfad = item.bild || item.Bild
-          ? ((item.bild || item.Bild).startsWith("/")
-              ? BASE_URL + (item.bild || item.Bild)
-              : BASE_URL + "/" + (item.bild || item.Bild))
-          : BASE_URL + "/Standardbilder/standard.jpg";
-
-        return {
-          barcode: item.barcode || item.Barcode || "",
-          artikel: item.artikel || item.Artikel || "Unbekannt",
-          name2: item.name2 || item.Name2 || "",
-          maxAnzahl: parseInt(item.maxAnzahl || item.MaxAnzahl || "1", 10),
-          bereich: item.bereich || item.Bereich || "",
-          bild: bildPfad
-        };
-      });
+        contacts = gefilterteDaten.map(item => ({
+          barcode: item.barcode,
+          artikel: item.artikel,
+          name2: item.name2,
+          maxAnzahl: parseInt(item.maxAnzahl ?? "1", 10),
+          bereich: item.bereich,
+          bild: item.bild
+            ? (item.bild.startsWith("/") ? BASE_URL + item.bild : BASE_URL + "/" + item.bild)
+            : BASE_URL + "/Standardbilder/standard.jpg"
+        }));
 
         renderKacheln(contacts);
+
       } catch (err) {
         console.error("Fehler beim Abrufen der Artikeldaten:", err);
         alert("Fehler beim Abrufen der Artikeldaten: " + err.message);
@@ -118,6 +96,15 @@ document.addEventListener("DOMContentLoaded", () => {
         btn.textContent = "Liste abrufen";
       }
     });
+  }
+
+  // 🔁 Nur HIER automatisch ausführen
+  if (urlBereich && btn) {
+    console.log("Auto-Load aktiv für Bereich:", urlBereich);
+    btn.click();
+    btn.style.display = "none"; // optional: Button ausblenden
+  }
+});
 
     // ✅ Auto-Load gehört HIERHIN (außerhalb des Eventlisteners)
     if (urlBereich) {
