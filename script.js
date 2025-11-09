@@ -103,7 +103,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
           return {
             barcode: item.barcode || "",
-            artikel: item.artikel || "",
+            artikel: item.artikel || item.name || "Unbekannt",  // <-- hier beide Felder abfragen
             name2: item.name2 || "",
             maxAnzahl: parseInt(item.maxAnzahl ?? "1", 10),
             bereich: item.bereich || "",
