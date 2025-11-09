@@ -358,11 +358,10 @@ function renderKacheln(contactsArray) {
   contactsArray.forEach(item => {
     const nameSafe = escapeHtml(item.artikel || "Unbekannt");
     const barcodeSafe = escapeHtml(item.barcode || "");
-    const maxAnz = item.maxAnzahl || 1;
-    const minAnz = item.minAnzahl || 0;
+    const maxAnz = item.maxAnzahl || 0;
 
-    // ✅ Startwert für Inputfeld berechnen
-    const startWert = minAnz > 0 ? 1 : 0;
+    // ✅ Startwert für Inputfeld berechnen: 1, wenn maxAnz > 0, sonst 0
+    const startWert = maxAnz > 0 ? 1 : 0;
 
     const bildSrc = escapeHtml(item.bild || "");
 
@@ -381,16 +380,17 @@ function renderKacheln(contactsArray) {
         <strong>Max. ${maxAnz}</strong>
         <label> : Anzahl</label>
         <input type="number" class="anzahl-input" data-barcode="${barcodeSafe}" 
-               value="${startWert}" min="${minAnz}" max="${maxAnz}">
+               value="${startWert}" min="0" max="${maxAnz}">
       </p>
       <button class="details-btn" data-barcode="${barcodeSafe}">Details</button>
     `;
     grid.appendChild(karte);
-  }); // <-- forEach Ende
+  });
 
   container.appendChild(grid);
   initCartEvents();
-} // <-- renderKacheln Ende
+}
+// renderKacheln Ende
 
 // ===========================
 // Events für Kacheln / Warenkorb
