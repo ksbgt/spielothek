@@ -355,37 +355,39 @@ function renderKacheln(contactsArray) {
   const grid = document.createElement("div");
   grid.className = "karten-container";
 
-  contactsArray.forEach(item => {
-    const nameSafe = escapeHtml(item.artikel || "Unbekannt");
-    const barcodeSafe = escapeHtml(item.barcode || "");
-    const maxAnz = item.maxAnzahl || 0;
+contactsArray.forEach(item => {
+  const nameSafe = escapeHtml(item.artikel || "Unbekannt");
+  const barcodeSafe = escapeHtml(item.barcode || "");
+  const maxAnz = item.maxAnzahl || 0;
+  
+  // Startwert für Inputfeld: 1, wenn maxAnz > 0, sonst 0
+  const startWert = maxAnz > 0 ? 1 : 0;
+  const bildSrc = escapeHtml(item.bild || "");
 
-    // ✅ Startwert für Inputfeld berechnen: 1, wenn maxAnz > 0, sonst 0
-    const startWert = maxAnz > 0 ? 1 : 0;
+  // ✅ Klasse "inactive" für Artikel mit maxAnz = 0
+  const inactiveClass = maxAnz === 0 ? "inactive" : "";
 
-    const bildSrc = escapeHtml(item.bild || "");
-
-    const karte = document.createElement("div");
-    karte.className = "karte";
-    karte.innerHTML = `
-      <div class="checkbox-wrapper" style="display:flex;align-items:center;justify-content:flex-start;position:relative;">
-        <input type="checkbox" class="select-artikel" data-barcode="${barcodeSafe}" aria-label="Artikel auswählen">
-        <span class="tooltip-placeholder" data-tooltip="Auswählen:\n${nameSafe}"></span>
-      </div>
-      <div style="margin-top:10px;">
-        ${bildSrc ? `<img src="${bildSrc}" alt="${nameSafe}" style="width:150px;border-radius:8px;">` : ""}
-      </div>
-      <h4>${nameSafe}</h4>
-      <p>
-        <strong>Max. ${maxAnz}</strong>
-        <label> : Anzahl</label>
-        <input type="number" class="anzahl-input" data-barcode="${barcodeSafe}" 
-               value="${startWert}" min="0" max="${maxAnz}">
-      </p>
-      <button class="details-btn" data-barcode="${barcodeSafe}">Details</button>
-    `;
-    grid.appendChild(karte);
-  });
+  const karte = document.createElement("div");
+  karte.className = `karte ${inactiveClass}`;
+  karte.innerHTML = `
+    <div class="checkbox-wrapper" style="display:flex;align-items:center;justify-content:flex-start;position:relative;">
+      <input type="checkbox" class="select-artikel" data-barcode="${barcodeSafe}" aria-label="Artikel auswählen" ${maxAnz===0?"disabled":""}>
+      <span class="tooltip-placeholder" data-tooltip="Auswählen:\n${nameSafe}"></span>
+    </div>
+    <div style="margin-top:10px;">
+      ${bildSrc ? `<img src="${bildSrc}" alt="${nameSafe}" style="width:150px;border-radius:8px;">` : ""}
+    </div>
+    <h4>${nameSafe}</h4>
+    <p>
+      <strong style="color:${maxAnz===0?'#d00':'inherit'}">Max. ${maxAnz}</strong>
+      <label> : Anzahl</label>
+      <input type="number" class="anzahl-input" data-barcode="${barcodeSafe}" 
+             value="${startWert}" min="0" max="${maxAnz}" ${maxAnz===0?"disabled":""}>
+    </p>
+    <button class="details-btn" data-barcode="${barcodeSafe}">Details</button>
+  `;
+  grid.appendChild(karte);
+});
 
   container.appendChild(grid);
   initCartEvents();
