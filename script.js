@@ -355,11 +355,13 @@ function renderKacheln(contactsArray) {
   contactsArray.forEach(item => {
     const nameSafe = escapeHtml(item.artikel || item.name || "Unbekannt");
     const barcodeSafe = escapeHtml(item.barcode || "");
-    const maxAnzahl = item.maxAnzahl || 1;
+    const minAnz = item.minAnzahl ?? 1;
+    const maxAnz = item.maxAnzahl ?? 1;
     const bildSrc = escapeHtml(item.bild || "");
 
     const karte = document.createElement("div");
     karte.className = "karte";
+
     karte.innerHTML = `
       <div class="checkbox-wrapper" style="display:flex;align-items:center;justify-content:flex-start;position:relative;">
         <input type="checkbox" class="select-artikel" data-barcode="${barcodeSafe}" aria-label="Artikel auswählen">
@@ -370,12 +372,13 @@ function renderKacheln(contactsArray) {
       </div>
       <h4>${nameSafe}</h4>
       <p>
-        <strong>Max. ${maxAnzahl}</strong>
+        <strong>Max. ${maxAnz}</strong>
         <label> : Anzahl</label>
-        <input type="number" class="anzahl-input" data-barcode="${barcodeSafe}" value="1" min="1" max="${maxAnzahl}">
+        <input type="number" class="anzahl-input" data-barcode="${barcodeSafe}" value="${minAnz}" min="${minAnz}" max="${maxAnz}">
       </p>
       <button class="details-btn" data-barcode="${barcodeSafe}">Details</button>
     `;
+
     grid.appendChild(karte);
   });
 
