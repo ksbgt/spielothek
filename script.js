@@ -92,20 +92,22 @@ document.addEventListener("DOMContentLoaded", () => {
           gefilterteDaten = daten.filter(item => item.bereich === urlBereich);
         }
 
-        contacts = gefilterteDaten.map(item => {
-          const bildPfad = item.bild
-            ? (item.bild.startsWith("/") ? BASE_URL + item.bild : BASE_URL + "/" + item.bild)
-            : BASE_URL + "/Standardbilder/standard.jpg";
+      contacts = gefilterteDaten.map(item => {
+        const bildPfad = item.bild || item.Bild
+          ? ((item.bild || item.Bild).startsWith("/")
+              ? BASE_URL + (item.bild || item.Bild)
+              : BASE_URL + "/" + (item.bild || item.Bild))
+          : BASE_URL + "/Standardbilder/standard.jpg";
 
-          return {
-            barcode: item.barcode || "",
-            artikel: item.artikel || "",
-            name2: item.name2 || "",
-            maxAnzahl: parseInt(item.maxAnzahl ?? "1", 10),
-            bereich: item.bereich || "",
-            bild: bildPfad
-          };
-        });
+        return {
+          barcode: item.barcode || item.Barcode || "",
+          artikel: item.artikel || item.Artikel || "Unbekannt",
+          name2: item.name2 || item.Name2 || "",
+          maxAnzahl: parseInt(item.maxAnzahl || item.MaxAnzahl || "1", 10),
+          bereich: item.bereich || item.Bereich || "",
+          bild: bildPfad
+        };
+      });
 
         renderKacheln(contacts);
       } catch (err) {
