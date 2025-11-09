@@ -341,33 +341,38 @@ function renderMiniCart() {
 // Kacheln rendern
 // ===========================
 function renderKacheln(contactsArray) {
-  const container=document.getElementById("anzeige");
-  if(!container) return;
-  container.innerHTML="";
-  if(!contactsArray?.length){container.innerHTML="<p><em>Keine Artikeldaten vorhanden.</em></p>"; return;}
+  const container = document.getElementById("anzeige");
+  if (!container) return;
+  container.innerHTML = "";
+  if (!contactsArray?.length) {
+    container.innerHTML = "<p><em>Keine Artikeldaten vorhanden.</em></p>";
+    return;
+  }
 
-  const grid=document.createElement("div");
-  grid.className="karten-container";
-  contactsArray.forEach(item=>{
-    const nameSafe=escapeHtml(item.artikel||"Unbekannt");
-    const barcodeSafe=escapeHtml(item.barcode||"");
-    const maxAnzahl=item.maxAnzahl||1;
-    const bildSrc=escapeHtml(item.bild||"");
+  const grid = document.createElement("div");
+  grid.className = "karten-container";
 
-    const karte=document.createElement("div");
-    karte.className="karte";
-    karte.innerHTML=`
+  contactsArray.forEach(item => {
+    const nameSafe = escapeHtml(item.artikel || item.name || "Unbekannt");
+    const barcodeSafe = escapeHtml(item.barcode || "");
+    const maxAnzahl = item.maxAnzahl || 1;
+    const bildSrc = escapeHtml(item.bild || "");
+
+    const karte = document.createElement("div");
+    karte.className = "karte";
+    karte.innerHTML = `
       <div class="checkbox-wrapper" style="display:flex;align-items:center;justify-content:flex-start;position:relative;">
         <input type="checkbox" class="select-artikel" data-barcode="${barcodeSafe}" aria-label="Artikel auswählen">
         <span class="tooltip-placeholder" data-tooltip="Auswählen:\n${nameSafe}"></span>
       </div>
       <div style="margin-top:10px;">
-        ${bildSrc? `<img src="${bildSrc}" alt="${nameSafe}" style="width:150px;border-radius:8px;">`:""}
+        ${bildSrc ? `<img src="${bildSrc}" alt="${nameSafe}" style="width:150px;border-radius:8px;">` : ""}
       </div>
       <h4>${nameSafe}</h4>
-       <p><strong>Max. ${escapeHtml(String(artikel.maxAnzahl??"—"))}</strong>
+      <p>
+        <strong>Max. ${maxAnzahl}</strong>
         <label> : Anzahl</label>
-        <input type="number" class="anzahl-input" data-barcode="${barcodeSafe}" value="${item.minAnzahl || 1}" min="${item.minAnzahl || 1}" max="${maxAnzahl}">
+        <input type="number" class="anzahl-input" data-barcode="${barcodeSafe}" value="1" min="1" max="${maxAnzahl}">
       </p>
       <button class="details-btn" data-barcode="${barcodeSafe}">Details</button>
     `;
@@ -379,63 +384,75 @@ function renderKacheln(contactsArray) {
 }
 
 // ===========================
-// Events für Kacheln
+// Events für Kacheln / Warenkorb
 // ===========================
 function initCartEvents() {
-  const miniCartEl=document.getElementById("mini-cart");
+  const miniCartEl = document.getElementById("mini-cart");
 
-  document.querySelectorAll(".select-artikel").forEach(cb=>{
-    const barcode=cb.dataset.barcode;
-    cb.addEventListener("change", ()=>{
-      const karte=cb.closest(".karte");
-      const input=karte?.querySelector(".anzahl-input");
-      const menge=parseInt(input?.value||1,10);
-      const artikelObj=contacts.find(c=>c.barcode===barcode);
-      if(!artikelObj) return;
-      if(cb.checked){
-        if(!aktuelleAuswahl.find(a=>a.barcode===barcode)){
-          aktuelleAuswahl.push({barcode, artikel:artikelObj.artikel, Kategoriename:artikelObj.bereich||"", Auswahl_Anzahl:menge});
+  document.querySelectorAll(".select-artikel").forEach(cb => {
+    const barcode = cb.dataset.barcode;
+    cb.addEventListener("change", () => {
+      const karte = cb.closest(".karte");
+      const input = karte?.querySelector(".anzahl-input");
+      const menge = parseInt(input?.value || 1, 10);
+      const artikelObj = contacts.find(c => c.barcode === barcode);
+      if (!artikelObj) return;
+
+      if (cb.checked) {
+        if (!aktuelleAuswahl.find(a => a.barcode === barcode)) {
+          aktuelleAuswahl.push({
+            barcode,
+            artikel: artikelObj.artikel || artikelObj.name || "Unbekannt",
+            Kategoriename: artikelObj.bereich || "",
+            Auswahl_Anzahl: menge
+          });
         }
       } else {
-        aktuelleAuswahl=aktuelleAuswahl.filter(a=>a.barcode!==barcode);
+        aktuelleAuswahl = aktuelleAuswahl.filter(a => a.barcode !== barcode);
       }
+
       updateCartIndicator();
-      if(aktuelleAuswahl.length>0 && miniCartEl?.classList.contains("hidden")) miniCartEl.classList.remove("hidden");
+      if (aktuelleAuswahl.length > 0 && miniCartEl?.classList.contains("hidden")) miniCartEl.classList.remove("hidden");
     });
   });
 
-  document.querySelectorAll(".anzahl-input").forEach(input=>{
-    input.addEventListener("input", ()=>{
-      const barcode=input.dataset.barcode;
-      let wert=parseInt(input.value||1,10);
-      const max=parseInt(input.max||1,10);
-      if(isNaN(wert)||wert<1) wert=1;
-      if(wert>max){wert=max; input.classList.add("input-fehler");} else input.classList.remove("input-fehler");
-      input.value=wert;
-      const artikel=aktuelleAuswahl.find(a=>a.barcode===barcode);
-      if(artikel) artikel.Auswahl_Anzahl=wert;
+  document.querySelectorAll(".anzahl-input").forEach(input => {
+    input.addEventListener("input", () => {
+      const barcode = input.dataset.barcode;
+      let wert = parseInt(input.value || 1, 10);
+      const max = parseInt(input.max || 1, 10);
+      if (isNaN(wert) || wert < 1) wert = 1;
+      if (wert > max) {
+        wert = max;
+        input.classList.add("input-fehler");
+      } else {
+        input.classList.remove("input-fehler");
+      }
+      input.value = wert;
+
+      const artikel = aktuelleAuswahl.find(a => a.barcode === barcode);
+      if (artikel) artikel.Auswahl_Anzahl = wert;
       updateCartIndicator();
     });
   });
 
-  document.querySelectorAll(".details-btn").forEach(btn=>{
-    btn.addEventListener("click", ()=>{
-      const barcode=btn.dataset.barcode;
-      const artikel=contacts.find(c=>c.barcode===barcode);
-      if(!artikel) return alert("Keine Details gefunden.");
-      openDetailsModal(artikel);
+  document.querySelectorAll(".details-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const barcode = btn.dataset.barcode;
+      const artikelObj = contacts.find(c => c.barcode === barcode);
+      if (!artikelObj) return alert("Keine Details gefunden.");
+      openDetailsModal(artikelObj);
     });
   });
 
   updateCartIndicator();
-  
-  // 🩹 Fix: Löschen der "1" auf Tablets ermöglichen
+
+  // 🩹 Fix für Tablets: letzte "1" löschen erlauben
   document.querySelectorAll(".anzahl-input").forEach(input => {
-    input.addEventListener("beforeinput", (e) => {
-      // Wenn der Nutzer die letzte Ziffer löscht (z. B. die "1"), erlauben wir kurz ein leeres Feld
+    input.addEventListener("beforeinput", e => {
       if (e.inputType === "deleteContentBackward" && input.value.length === 1) {
         input.value = "";
-        e.preventDefault(); // verhindert, dass Browser "1" sofort zurücksetzt
+        e.preventDefault();
       }
     });
   });
