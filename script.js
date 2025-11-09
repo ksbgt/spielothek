@@ -86,6 +86,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const resLocal = await fetch("Exports/Artikel.json");
         const daten = await resLocal.json();
 
+        console.log("👉 Geladene Artikel (1. Datensatz):", daten[0]);
+        console.log("👉 Alle Schlüssel im 1. Datensatz:", Object.keys(daten[0]));
+
         // 🔍 Nur Artikel des aktiven Bereichs laden (wenn Parameter angegeben)
         let gefilterteDaten = daten;
         if (urlBereich) {
@@ -121,7 +124,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (urlBereich) {
       console.log("Auto-Load aktiv für Bereich:", urlBereich);
       btn.click();                // Klickt automatisch
-      btn.style.display = "none"; // Optional: Button ausblenden
+      // btn.style.display = "none"; // Optional: Button ausblenden
     }
   }
 
