@@ -42,72 +42,88 @@ function formatDateGerman(isoDateStr) {
 // DOMContentLoaded
 // ===========================
 document.addEventListener("DOMContentLoaded", () => {
-
+  // ==========================================
+  // 🔍 Bereich aus URL-Parameter lesen
+  // ==========================================
   const params = new URLSearchParams(window.location.search);
-  const urlBereich = params.get("bereich") || "";
+  // const urlBereich = params.get("bereich") || "";
+  const urlBereich = params.get("bereich") || ""; 
 
   const bereichHinweis = document.getElementById("bereich-hinweis");
-  if (bereichHinweis && urlBereich) {
-    bereichHinweis.textContent = urlBereich.slice(3); // z. B. "Spielothek"
-  }
+    if (bereichHinweis && urlBereich) {
+      bereichHinweis.textContent = urlBereich.slice(3); // oder z. B. "01 Spielothek"
+    }
 
-  const btn = document.getElementById("btn");
+  const btn = document.getElementById("btn"); // „Liste abrufen“
+  const cartIndicator = document.getElementById("cart-indicator");
+  const miniCart = document.getElementById("mini-cart");
+  const closeMiniCart = document.getElementById("closeMiniCart");
+  const sendBtn = document.getElementById("sendCartBtn");
 
-// 1️⃣ Artikel-Liste laden
-if (btn) {
-  btn.addEventListener("click", async () => {
-    try {
-      btn.disabled = true;
-      btn.textContent = "Lade...";
-
-      const BASE_URL = "https://ksbgt.github.io/spielothek/";
-      const resLocal = await fetch("Exports/Artikel.json");
-      const daten = await resLocal.json();
-
-      // 🔍 Testausgabe (Konsole)
-      console.log("Geladene Datensätze:", daten.length);
-      console.log("Beispiel (1. Datensatz):", daten[0]);
-
-      // 🔍 Nur Artikel des aktiven Bereichs laden
-      let gefilterteDaten = daten;
-      if (urlBereich) {
-        gefilterteDaten = daten.filter(item => item.bereich === urlBereich);
-        console.log("Gefiltert:", gefilterteDaten.length, "Artikel für Bereich", urlBereich);
-        console.log("Erste gefilterte Zeile:", gefilterteDaten[0]);
+  // 1️⃣ Artikel-Liste laden
+  if (btn) {
+    btn.addEventListener("click", async () => {
+      if (contacts.length > 0 || aktuelleAuswahl.length > 0) {
+        const confirmReload = confirm(
+          "Die aktuelle Auswahlliste wird gelöscht und neu geladen.\n\nMöchten Sie fortfahren?"
+        );
+        if (!confirmReload) return;
       }
 
-      // 🧱 Kontakte vorbereiten
-      contacts = gefilterteDaten.map(item => ({
-        barcode: item.barcode || "",
-        artikel: item.artikel || "Unbekannt",
-        name2: item.name2 || "",
-        maxAnzahl: parseInt(item.maxAnzahl ?? "1", 10),
-        bereich: item.bereich || "",
-        bild: item.bild
-          ? (item.bild.startsWith("/") ? BASE_URL + item.bild : BASE_URL + "/" + item.bild)
-          : BASE_URL + "/Standardbilder/standard.jpg"
-      }));
+      try {
+        btn.disabled = true;
+        btn.textContent = "Lade...";
 
-      renderKacheln(contacts);
+        aktuelleAuswahl = [];
+        updateCartIndicator();
 
-    } catch (err) {
-      console.error("Fehler beim Abrufen der Artikeldaten:", err);
-      alert("Fehler beim Abrufen der Artikeldaten: " + err.message);
-    } finally {
-      btn.disabled = false;
-      btn.textContent = "Liste abrufen";
+        ["contact-name", "contact-email", "date-from", "date-to", "contact-info", "contact-organisation"].forEach(id => {
+          const f = document.getElementById(id);
+          if (f) f.value = "";
+        });
+
+        const BASE_URL = "https://ksbgt.github.io/spielothek/";
+        const resLocal = await fetch("Exports/Artikel.json");
+        const daten = await resLocal.json();
+
+        // 🔍 Nur Artikel des aktiven Bereichs laden (wenn Parameter angegeben)
+        let gefilterteDaten = daten;
+        if (urlBereich) {
+          gefilterteDaten = daten.filter(item => item.bereich === urlBereich);
+        }
+
+        contacts = gefilterteDaten.map(item => {
+          const bildPfad = item.bild
+            ? (item.bild.startsWith("/") ? BASE_URL + item.bild : BASE_URL + "/" + item.bild)
+            : BASE_URL + "/Standardbilder/standard.jpg";
+
+          return {
+            barcode: item.barcode || "",
+            artikel: item.artikel || "",
+            name2: item.name2 || "",
+            maxAnzahl: parseInt(item.maxAnzahl ?? "1", 10),
+            bereich: item.bereich || "",
+            bild: bildPfad
+          };
+        });
+
+        renderKacheln(contacts);
+      } catch (err) {
+        console.error("Fehler beim Abrufen der Artikeldaten:", err);
+        alert("Fehler beim Abrufen der Artikeldaten: " + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Liste abrufen";
+      }
+    });
+
+    // ✅ Auto-Load gehört HIERHIN (außerhalb des Eventlisteners)
+    if (urlBereich) {
+      console.log("Auto-Load aktiv für Bereich:", urlBereich);
+      btn.click();                // Klickt automatisch
+      btn.style.display = "none"; // Optional: Button ausblenden
     }
-  });
-
-  // ✅ Auto-Load mit Verzögerung (Timing-Fix)
-  if (urlBereich) {
-    console.log("Auto-Load aktiv für Bereich:", urlBereich);
-    setTimeout(() => {
-      btn.click();                // Klick erst nach 300ms ausführen
-    }, 300);
-    btn.style.display = "none";   // Optional: Button ausblenden
   }
-}
 
   // 2️⃣ Warenkorb-Indikator togglen
   if (cartIndicator && miniCart) {
