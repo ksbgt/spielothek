@@ -356,15 +356,18 @@ function renderKacheln(contactsArray) {
   grid.className = "karten-container";
 
   contactsArray.forEach(item => {
-    const nameSafe = escapeHtml(item.artikel || item.name || "Unbekannt");
+    const nameSafe = escapeHtml(item.artikel || "Unbekannt");
     const barcodeSafe = escapeHtml(item.barcode || "");
-    const minAnz = item.minAnzahl ?? 1;
-    const maxAnz = item.maxAnzahl ?? 1;
+    const maxAnz = item.maxAnzahl || 1;
+    const minAnz = item.minAnzahl || 0;
+
+    // ✅ Startwert für Inputfeld berechnen
+    const startWert = minAnz > 0 ? 1 : 0;
+
     const bildSrc = escapeHtml(item.bild || "");
 
     const karte = document.createElement("div");
     karte.className = "karte";
-
     karte.innerHTML = `
       <div class="checkbox-wrapper" style="display:flex;align-items:center;justify-content:flex-start;position:relative;">
         <input type="checkbox" class="select-artikel" data-barcode="${barcodeSafe}" aria-label="Artikel auswählen">
@@ -378,17 +381,16 @@ function renderKacheln(contactsArray) {
         <strong>Max. ${maxAnz}</strong>
         <label> : Anzahl</label>
         <input type="number" class="anzahl-input" data-barcode="${barcodeSafe}" 
-          value="${item.minAnzahl}" min="${item.minAnzahl}" max="${item.maxAnzahl}">
+               value="${startWert}" min="${minAnz}" max="${maxAnz}">
       </p>
       <button class="details-btn" data-barcode="${barcodeSafe}">Details</button>
     `;
-
     grid.appendChild(karte);
-  });
+  }); // <-- forEach Ende
 
   container.appendChild(grid);
   initCartEvents();
-}
+} // <-- renderKacheln Ende
 
 // ===========================
 // Events für Kacheln / Warenkorb
