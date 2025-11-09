@@ -101,12 +101,15 @@ document.addEventListener("DOMContentLoaded", () => {
             ? (item.bild.startsWith("/") ? BASE_URL + item.bild : BASE_URL + "/" + item.bild)
             : BASE_URL + "/Standardbilder/standard.jpg";
 
+          const minAnz = parseInt(item.minAnzahl ?? "0", 10);
+          const maxAnz = parseInt(item.maxAnzahl ?? "1", 10);
+
           return {
             barcode: item.barcode || "",
-            artikel: item.artikel || item.name || "Unbekannt",  // <-- hier beide Felder abfragen
+            artikel: item.artikel || item.name || "Unbekannt",
             name2: item.name2 || "",
-            maxAnzahl: parseInt(item.maxAnzahl ?? "1", 10),
-            minAnzahl: parseInt(item.minAnzahl ?? "0", 10),
+            minAnzahl: minAnz,
+            maxAnzahl: maxAnz,
             bereich: item.bereich || "",
             bild: bildPfad
           };
@@ -374,7 +377,8 @@ function renderKacheln(contactsArray) {
       <p>
         <strong>Max. ${maxAnz}</strong>
         <label> : Anzahl</label>
-        <input type="number" class="anzahl-input" data-barcode="${barcodeSafe}" value="${minAnz}" min="${minAnz}" max="${maxAnz}">
+        <input type="number" class="anzahl-input" data-barcode="${barcodeSafe}" 
+          value="${item.minAnzahl}" min="${item.minAnzahl}" max="${item.maxAnzahl}">
       </p>
       <button class="details-btn" data-barcode="${barcodeSafe}">Details</button>
     `;
