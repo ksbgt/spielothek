@@ -365,7 +365,7 @@ function renderKacheln(contactsArray) {
         ${bildSrc? `<img src="${bildSrc}" alt="${nameSafe}" style="width:150px;border-radius:8px;">`:""}
       </div>
       <h4>${nameSafe}</h4>
-      <p><strong>Max. ${maxAnzahl}</strong>
+       <p><strong>Max. ${escapeHtml(String(artikel.maxAnzahl??"—"))}</strong>
         <label> : Anzahl</label>
         <input type="number" class="anzahl-input" data-barcode="${barcodeSafe}" value="${item.minAnzahl || 1}" min="${item.minAnzahl || 1}" max="${maxAnzahl}">
       </p>
