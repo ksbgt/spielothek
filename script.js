@@ -106,6 +106,7 @@ document.addEventListener("DOMContentLoaded", () => {
             artikel: item.artikel || item.name || "Unbekannt",  // <-- hier beide Felder abfragen
             name2: item.name2 || "",
             maxAnzahl: parseInt(item.maxAnzahl ?? "1", 10),
+            minAnzahl: parseInt(item.minAnzahl ?? "0", 10),
             bereich: item.bereich || "",
             bild: bildPfad
           };
@@ -366,7 +367,7 @@ function renderKacheln(contactsArray) {
       <h4>${nameSafe}</h4>
       <p><strong>Max. ${maxAnzahl}</strong>
         <label> : Anzahl</label>
-        <input type="number" class="anzahl-input" data-barcode="${barcodeSafe}" value="1" min="1" max="${maxAnzahl}">
+        <input type="number" class="anzahl-input" data-barcode="${barcodeSafe}" value="${item.minAnzahl || 1}" min="${item.minAnzahl || 1}" max="${maxAnzahl}">
       </p>
       <button class="details-btn" data-barcode="${barcodeSafe}">Details</button>
     `;
