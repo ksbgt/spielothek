@@ -53,17 +53,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const btn = document.getElementById("btn");
 
-  // 1️⃣ Artikel-Liste laden
-  if (btn) {
-    btn.addEventListener("click", async () => {
-      try {
-        btn.disabled = true;
-        btn.textContent = "Lade...";
+// 1️⃣ Artikel-Liste laden
+if (btn) {
+  btn.addEventListener("click", async () => {
+    try {
+      btn.disabled = true;
+      btn.textContent = "Lade...";
 
+      const BASE_URL = "https://ksbgt.github.io/spielothek/";
       const resLocal = await fetch("Exports/Artikel.json");
       const daten = await resLocal.json();
 
-      // 🔍 Testausgabe
+      // 🔍 Testausgabe (Konsole)
       console.log("Geladene Datensätze:", daten.length);
       console.log("Beispiel (1. Datensatz):", daten[0]);
 
@@ -75,44 +76,38 @@ document.addEventListener("DOMContentLoaded", () => {
         console.log("Erste gefilterte Zeile:", gefilterteDaten[0]);
       }
 
-        contacts = gefilterteDaten.map(item => ({
-          barcode: item.barcode,
-          artikel: item.artikel,
-          name2: item.name2,
-          maxAnzahl: parseInt(item.maxAnzahl ?? "1", 10),
-          bereich: item.bereich,
-          bild: item.bild
-            ? (item.bild.startsWith("/") ? BASE_URL + item.bild : BASE_URL + "/" + item.bild)
-            : BASE_URL + "/Standardbilder/standard.jpg"
-        }));
+      // 🧱 Kontakte vorbereiten
+      contacts = gefilterteDaten.map(item => ({
+        barcode: item.barcode || "",
+        artikel: item.artikel || "Unbekannt",
+        name2: item.name2 || "",
+        maxAnzahl: parseInt(item.maxAnzahl ?? "1", 10),
+        bereich: item.bereich || "",
+        bild: item.bild
+          ? (item.bild.startsWith("/") ? BASE_URL + item.bild : BASE_URL + "/" + item.bild)
+          : BASE_URL + "/Standardbilder/standard.jpg"
+      }));
 
-        renderKacheln(contacts);
+      renderKacheln(contacts);
 
-      } catch (err) {
-        console.error("Fehler beim Abrufen der Artikeldaten:", err);
-        alert("Fehler beim Abrufen der Artikeldaten: " + err.message);
-      } finally {
-        btn.disabled = false;
-        btn.textContent = "Liste abrufen";
-      }
-    });
-  }
-
-  // 🔁 Nur HIER automatisch ausführen
-  if (urlBereich && btn) {
-    console.log("Auto-Load aktiv für Bereich:", urlBereich);
-    btn.click();
-    btn.style.display = "none"; // optional: Button ausblenden
-  }
-});
-
-    // ✅ Auto-Load gehört HIERHIN (außerhalb des Eventlisteners)
-    if (urlBereich) {
-      console.log("Auto-Load aktiv für Bereich:", urlBereich);
-      btn.click();                // Klickt automatisch
-      btn.style.display = "none"; // Optional: Button ausblenden
+    } catch (err) {
+      console.error("Fehler beim Abrufen der Artikeldaten:", err);
+      alert("Fehler beim Abrufen der Artikeldaten: " + err.message);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Liste abrufen";
     }
+  });
+
+  // ✅ Auto-Load mit Verzögerung (Timing-Fix)
+  if (urlBereich) {
+    console.log("Auto-Load aktiv für Bereich:", urlBereich);
+    setTimeout(() => {
+      btn.click();                // Klick erst nach 300ms ausführen
+    }, 300);
+    btn.style.display = "none";   // Optional: Button ausblenden
   }
+}
 
   // 2️⃣ Warenkorb-Indikator togglen
   if (cartIndicator && miniCart) {
