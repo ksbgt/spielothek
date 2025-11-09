@@ -359,20 +359,19 @@ contactsArray.forEach(item => {
   const nameSafe = escapeHtml(item.artikel || "Unbekannt");
   const barcodeSafe = escapeHtml(item.barcode || "");
   const maxAnz = item.maxAnzahl || 0;
-  
-  // Startwert für Inputfeld: 1, wenn maxAnz > 0, sonst 0
   const startWert = maxAnz > 0 ? 1 : 0;
   const bildSrc = escapeHtml(item.bild || "");
-
-  // ✅ Klasse "inactive" für Artikel mit maxAnz = 0
   const inactiveClass = maxAnz === 0 ? "inactive" : "";
+
+  const tooltipColor = maxAnz === 0 ? "#f8d7da" : "#d4edda"; // rot für nicht verfügbar, grün für verfügbar
 
   const karte = document.createElement("div");
   karte.className = `karte ${inactiveClass}`;
   karte.innerHTML = `
     <div class="checkbox-wrapper" style="display:flex;align-items:center;justify-content:flex-start;position:relative;">
       <input type="checkbox" class="select-artikel" data-barcode="${barcodeSafe}" aria-label="Artikel auswählen" ${maxAnz===0?"disabled":""}>
-      <span class="tooltip-placeholder" data-tooltip="Auswählen:\n${nameSafe}"></span>
+      <span class="tooltip-placeholder" data-tooltip="Auswählen:\n${nameSafe}" 
+            style="background-color: ${tooltipColor};"></span>
     </div>
     <div style="margin-top:10px;">
       ${bildSrc ? `<img src="${bildSrc}" alt="${nameSafe}" style="width:150px;border-radius:8px;">` : ""}
