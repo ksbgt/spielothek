@@ -73,6 +73,32 @@ button:hover { transform: translateY(-2px); }
   color: #d00;               /* Schrift rot */
 }
 
+/* Tooltip-Farben */
+.tooltip-placeholder {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  margin-left: 5px;
+  cursor: pointer;
+}
+
+/* ✅ Standard (verfügbar) */
+.tooltip-available {
+  background-color: #4CAF50; /* Grün */
+}
+
+/* 🚫 Nicht verfügbar */
+.tooltip-unavailable {
+  background-color: #d9534f; /* Rot */
+  opacity: 0.8;
+}
+
+/* Für Text (z. B. Max = 0) */
+.text-unavailable {
+  color: #d00;
+  font-weight: bold;
+}
 
 /* Checkbox */
 .select-artikel {
