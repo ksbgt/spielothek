@@ -363,36 +363,34 @@ contactsArray.forEach(item => {
   const bildSrc = escapeHtml(item.bild || "");
   const inactiveClass = maxAnz === 0 ? "inactive" : "";
 
-  const tooltipColor = maxAnz === 0 ? "#f8d7da" : "#d4edda"; // rot für nicht verfügbar, grün für verfügbar
-
-const karte = document.createElement("div");
-karte.className = `karte ${inactiveClass}`;
-
-// ✅ Tooltip-Farbklasse je nach Verfügbarkeit
   const tooltipClass = maxAnz === 0 ? "tooltip-unavailable" : "tooltip-available";
-// 🟢 Tooltip-Text dynamisch nach Verfügbarkeit
+
+  // 🟢 Tooltip-Text dynamisch nach Verfügbarkeit
   const tooltipText = maxAnz === 0 
-    ? `z.Zt. nicht verfügbar:\n${nameSafe}` 
+    ? `Nicht verfügbar:\n${nameSafe}` 
     : `Auswählen:\n${nameSafe}`;
 
-karte.innerHTML = `
-  <div class="checkbox-wrapper" style="display:flex;align-items:center;justify-content:flex-start;position:relative;">
-    <input type="checkbox" class="select-artikel" data-barcode="${barcodeSafe}" aria-label="Artikel auswählen" ${maxAnz===0?"disabled":""}>
-    <span class="tooltip-placeholder ${tooltipClass}" data-tooltip="Auswählen:\n${nameSafe}"></span>
-  </div>
-  <div style="margin-top:10px;">
-    ${bildSrc ? `<img src="${bildSrc}" alt="${nameSafe}" style="width:150px;border-radius:8px;">` : ""}
-  </div>
-  <h4>${nameSafe}</h4>
-  <p>
-    <strong class="${maxAnz===0 ? 'text-unavailable' : ''}">Max. ${maxAnz}</strong>
-    <label> : Anzahl</label>
-    <input type="number" class="anzahl-input" data-barcode="${barcodeSafe}" 
-           value="${startWert}" min="0" max="${maxAnz}" ${maxAnz===0?"disabled":""}>
-  </p>
-  <button class="details-btn" data-barcode="${barcodeSafe}">Details</button>
-`;
-grid.appendChild(karte);
+  const karte = document.createElement("div");
+  karte.className = `karte ${inactiveClass}`;
+
+  karte.innerHTML = `
+    <div class="checkbox-wrapper" style="display:flex;align-items:center;justify-content:flex-start;position:relative;">
+      <input type="checkbox" class="select-artikel" data-barcode="${barcodeSafe}" aria-label="Artikel auswählen" ${maxAnz===0?"disabled":""}>
+      <span class="tooltip-placeholder ${tooltipClass}" data-tooltip="${tooltipText}"></span>
+    </div>
+    <div style="margin-top:10px;">
+      ${bildSrc ? `<img src="${bildSrc}" alt="${nameSafe}" style="width:150px;border-radius:8px;">` : ""}
+    </div>
+    <h4>${nameSafe}</h4>
+    <p>
+      <strong class="${maxAnz===0 ? 'text-unavailable' : ''}">Max. ${maxAnz}</strong>
+      <label> : Anzahl</label>
+      <input type="number" class="anzahl-input" data-barcode="${barcodeSafe}" 
+             value="${startWert}" min="0" max="${maxAnz}" ${maxAnz===0?"disabled":""}>
+    </p>
+    <button class="details-btn" data-barcode="${barcodeSafe}">Details</button>
+  `;
+  grid.appendChild(karte);
 });
 
   container.appendChild(grid);
