@@ -367,7 +367,7 @@ contactsArray.forEach(item => {
 
   // 🟢 Tooltip-Text dynamisch nach Verfügbarkeit
   const tooltipText = maxAnz === 0 
-    ? `Nicht verfügbar:\n${nameSafe}` 
+    ? `z.Zt. nicht verfügbar:\n${nameSafe}` 
     : `Auswählen:\n${nameSafe}`;
 
   const karte = document.createElement("div");
