@@ -369,7 +369,11 @@ const karte = document.createElement("div");
 karte.className = `karte ${inactiveClass}`;
 
 // ✅ Tooltip-Farbklasse je nach Verfügbarkeit
-const tooltipClass = maxAnz === 0 ? "tooltip-unavailable" : "tooltip-available";
+  const tooltipClass = maxAnz === 0 ? "tooltip-unavailable" : "tooltip-available";
+// 🟢 Tooltip-Text dynamisch nach Verfügbarkeit
+  const tooltipText = maxAnz === 0 
+    ? `z.Zt. nicht verfügbar:\n${nameSafe}` 
+    : `Auswählen:\n${nameSafe}`;
 
 karte.innerHTML = `
   <div class="checkbox-wrapper" style="display:flex;align-items:center;justify-content:flex-start;position:relative;">
