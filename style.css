@@ -65,8 +65,8 @@ button:hover { transform: translateY(-2px); }
 .karte button { background-color: royalblue; color:#fff; padding:10px 20px; border-radius:25px; }
 .karte button:hover { background-color:#0056d6; }
 .karte.inactive {
-  background-color: #f8d7da; /* hellrot / Warnfarbe */
-  opacity: 0.6;              /* leicht transparent */
+  background-color: #f5f7f8; /*  Warnfarbe */
+  opacity: 0.3;              /* leicht transparent */
 }
 .karte.inactive h4,
 .karte.inactive p {
