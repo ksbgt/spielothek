@@ -254,8 +254,14 @@ function openSummaryModal() {
   document.body.style.overflow = "hidden";
 
   const closeModal = () => {
+    // Modal Schließen
     modal.classList.add("hidden");
     document.body.style.overflow = "";
+
+    // Senden-Button wieder aktivieren und sichtbar machen
+    confirmBtn.disabled = false;
+    confirmBtn.style.display = "";
+    statusEl.textContent = "";
   };
 
   closeBtn.onclick = closeModal;
