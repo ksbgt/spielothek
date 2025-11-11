@@ -385,7 +385,7 @@ contactsArray.forEach(item => {
       <span class="tooltip-placeholder ${tooltipClass}" data-tooltip="${tooltipText}"></span>
     </div>
     <div style="margin-top:10px;">
-      ${bildSrc ? `<img src="${bildSrc}" alt="${nameSafe}" style="width:150px;border-radius:8px;">` : ""}
+      ${bildSrc ? `<img src="${bildSrc}" alt="${nameSafe}" style="width:150px;border-radius:8px;" onerror="this.onerror=null;this.src='/Standardbilder/standard.jpg';">` : ""}
     </div>
     <h4>${nameSafe}</h4>
     <p>
