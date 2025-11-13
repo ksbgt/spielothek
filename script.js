@@ -265,7 +265,7 @@ function openSummaryModal() {
   };
 
   closeBtn.onclick = closeModal;
-  cancelBtn.onclick = () => { resetFormAndCart(); closeModal(); };
+  cancelBtn.onclick = () => { closeModal(); };
   document.addEventListener("keydown", e => { if(e.key==="Escape") closeModal(); }, { once:true });
 
   confirmBtn.onclick = async () => {
@@ -278,7 +278,9 @@ function openSummaryModal() {
       barcode: a.barcode,
       artikel: a.artikel,
       Kategoriename: a.Kategoriename||"",
-      Auswahl_Anzahl: a.Auswahl_Anzahl
+      Auswahl_Anzahl: a.Auswahl_Anzahl,
+      // imageUrl: `https://ksbgt.github.io/spielothek/produktbilder/${a.barcode}.jpg`
+
     }))};
 
     try {
@@ -288,10 +290,15 @@ function openSummaryModal() {
       if (antwort.success) {
         statusEl.textContent = "✅ Anfrage erfolgreich gesendet!";
         statusEl.style.color = "#06803d";
+
         // Senden-Button ausblenden
         confirmBtn.style.display = "none";
+        // Formular und Auswahl zurücksetzen nach erfolgreichem Senden
+        resetFormAndCart();
 
-        // Die Auswahl wird **noch nicht** zurückgesetzt – passiert erst bei Abbrechen
+        // Modal nach kurzer Verzögerung schließen (optional)
+        setTimeout(() => closeModal(), 1500);
+
       } else {
         statusEl.textContent = "❌ Anfrage konnte nicht verarbeitet werden: " + (antwort.message||"");
         statusEl.style.color = "#d00";
